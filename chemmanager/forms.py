@@ -1,5 +1,5 @@
 from django import forms
-from .models import Chemical
+from .models import Chemical, Stock, Extraction
 
 
 class ChemicalCreateForm(forms.ModelForm):
@@ -24,6 +24,24 @@ class ChemicalCreateForm(forms.ModelForm):
             'molar_mass': html_script + 'Molar Mass in \(\mathrm{g}\cdot\mathrm{mol}^{-1}\)'
         }
 
+
+class StockUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = Stock
+        fields = ('name', 'quantity', 'unit', 'chemical')
+
+
+class ExtractionCreateForm(forms.ModelForm):
+    anonymous = forms.BooleanField(required=False, label='stay anonymous')
+
+    class Meta:
+        model = Extraction
+        fields = ('quantity', 'comment', 'date_created')
+
+        widgets = {
+            'anonymous': forms.CheckboxInput()
+        }
 
 # name = models.CharField(max_length=250)
 #     structure = models.CharField(max_length=250, blank=True)

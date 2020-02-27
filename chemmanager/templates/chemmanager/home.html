@@ -58,16 +58,27 @@
                 <div class="collapse show" id="collapseStock-{{ chemical.id }}">
                     {% for stock in chemical.stock_set.all %}
                     <div class="list-group">
-                        <a href="{% url 'stock-detail' stock.id %}" class="list-group-item list-group-item-action flex-column align-items-start"
+                        <div class="list-group-item list-group-item-action flex-column align-items-start"
                            data-toggle="tooltip" data-placement="top" title="Last used at {{ stock.date_changed|date:"D d. F Y" }}">
                             <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">{{ stock.name }}</h5>
+                                <a class="h5" href="{% url 'stock-update' stock.id %}">{{ stock.name }}</a>
                                 {% if stock.unit %}
-                                    <h5>{{ stock.quantity }} {{ stock.unit }}</h5>
+                                    <a class="h5 btn btn-outline-info" href="{% url 'extraction-create' stock.id %}">{{ stock.quantity }} {{ stock.unit }}</a>
                                 {% else %}
                                     <h5>{{ stock.quantity }} - </h5>
                                 {% endif %}
                             </div>
+                            <!-- Just temporary table -->
+                            <table class="table table-sm table-striped">
+                            {% for extraction in stock.extraction_set.all %}
+                                <tr>
+                                <th>{{ extraction.quantity }} {{ stock.unit }}</th>
+                                <th>{{ extraction.comment }}</th>
+                                <th>{{ extraction.date_created }}</th>
+                                <th>{{ extraction.user.username }}</th>
+                                </tr>
+                            {% endfor %}
+                            </table>
                             <!-- Editable Text -->
                             <!-- End -->
                             {% if stock.comment %}
@@ -75,7 +86,7 @@
                             {% endif %}
 {#                            <p class="mb-1">Here should be button to delete and form to extract some.</p>#}
                             <small class="text-muted">{{ stock.date_created|date:"D d. F Y" }}</small>
-                        </a>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>

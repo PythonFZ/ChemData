@@ -4,8 +4,9 @@ from .views import (
     ChemicalUpdateView,
     ChemicalCreateView,
     StockCreateView,
-    StockDetailView,
+    StockUpdateView,
     ChemicalDeleteView,
+    ExtractionCreateView
 )
 from django.contrib.auth.decorators import login_required
 from . import views
@@ -15,6 +16,7 @@ urlpatterns = [
     path('chemical/<int:pk>/update', ChemicalUpdateView.as_view(), name='chemical-detail'),
     path('chemical/new/', login_required(ChemicalCreateView.as_view()), name='chemical-create'),
     path('stock/<int:pk>/new/', login_required(StockCreateView.as_view()), name='stock-create'),
-    path('stock/<int:pk>/', login_required(StockDetailView.as_view()), name='stock-detail'),
-    path('chemical/<int:pk>/delete', ChemicalDeleteView.as_view(), name='chemical-delete')
+    path('stock/<int:pk>/', login_required(StockUpdateView.as_view()), name='stock-update'),
+    path('chemical/<int:pk>/delete', ChemicalDeleteView.as_view(), name='chemical-delete'),
+    path('stock/<int:pk>/extraction/new', ExtractionCreateView.as_view(), name='extraction-create'),
 ]

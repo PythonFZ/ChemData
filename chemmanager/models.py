@@ -54,6 +54,24 @@ class Stock(models.Model):
     def __str__(self):
         return self.name
 
+    # def get_absolute_url(self):
+    #     return reverse('stock-detail', kwargs={'pk': self.pk})
+
     def get_absolute_url(self):
-        return reverse('stock-detail', kwargs={'pk': self.pk})
+        url = reverse('chemmanager-home') + '?q=' + self.chemical.name
+        return url
+
+
+class Extraction(models.Model):
+    # TODO different Units interconversion
+    quantity = models.FloatField()
+    date_created = models.DateTimeField(default=timezone.now)
+    comment = models.TextField(blank=True, null=True)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+
+    def get_absolute_url(self):
+        url = reverse('chemmanager-home') + '?q=' + self.stock.chemical.name
+        return url
 

@@ -3,8 +3,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from .models import Chemical, Stock
-from .forms import ChemicalCreateForm
+from .models import Chemical, Stock, Extraction
+from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
 
 
 class StockCreateView(CreateView):
@@ -106,6 +106,20 @@ class ChemicalDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return HttpResponseRedirect(self.success_url)
 
 
-class StockDetailView(DetailView):
+class StockUpdateView(UpdateView):
     model = Stock
+    form_class = StockUpdateForm
 
+
+class ExtractionCreateView(CreateView):
+    model = Extraction
+    form_class = ExtractionCreateForm
+
+    def form_valid(self, form):
+        if self.request.POST.get('anonymous'):
+            form.instance.user = None
+        else:
+            form.instance.user = self.request.user
+        form.instance.stock = Stock.objects.get(id=self.kwargs['pk'])
+
+        return super().form_valid(form)
