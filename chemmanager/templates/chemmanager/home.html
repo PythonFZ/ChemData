@@ -1,0 +1,89 @@
+{% extends "chemmanager/chemmanager_base.html" %}
+{% load crispy_forms_tags %}
+
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
+
+{% block content %}
+    <form class="card card-sm mb-4">
+        <div class="card-body row no-gutters align-items-center">
+            <!--end of col-->
+            <div class="col">
+                <input class="form-control form-control-lg form-control-borderless" type="text" placeholder="Search topics or keywords" name="q" value="{{ request.Get.q }}">
+            </div>
+            <!--end of col-->
+            <div class="col-auto">&nbsp;</div>
+            <div class="col-auto">
+                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals">Search</button>
+            </div>
+            <!--end of col-->
+        </div>
+    </form>
+
+    {% for chemical in chemicals %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <h4><a class="article-title" href="{% url 'chemical-detail' chemical.id %}"
+                           data-toggle="tooltip" title="Click to edit!">{{ chemical.name }}</a></h4>
+                    <form class="mb-1" action="{% url 'stock-create' chemical.id %}">
+                        <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#collapseStock-{{ chemical.id }}" aria-expanded="true" aria-controls="collapseStock-{{ chemical.id }}">Stock</button>
+                        <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#collapseProperties-{{ chemical.id }}" aria-expanded="false" aria-controls="collapseProperties-{{ chemical.id }}">Properties</button>
+                        <button class="btn btn-warning btn-sm" name="chemical" type="submit" value="{{ chemical.id }}">Add Stock</button>
+                    </form>
+                </div>
+                <div class="collapse" id="collapseProperties-{{ chemical.id }}">
+                    <dl class="row">
+                        {% if chemical.molar_mass %}
+                        <dt class="col-sm-3">Molare Mass</dt>
+                        <dd class="col-sm-9"> {{ chemical.molar_mass }} g/mol</dd>
+                        {% endif %}
+                        {% if chemical.melting_point %}
+                        <dt class="col-sm-3">Melting Point</dt>
+                        <dd class="col-sm-9">{{ chemical.melting_point }} °C</dd>
+                        {% endif %}
+                        {% if chemical.boiling_point %}
+                        <dt class="col-sm-3">Boiling Point</dt>
+                        <dd class="col-sm-9">{{ chemical.boiling_point }} °C</dd>
+                        {% endif %}
+                        {% if chemical.density %}
+                        <dt class="col-sm-3">Density</dt>
+                        <dd class="col-sm-9">{{ chemical.density }} g/L</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+                <div class="collapse show" id="collapseStock-{{ chemical.id }}">
+                    {% for stock in chemical.stock_set.all %}
+                    <div class="list-group">
+                        <a href="{% url 'stock-detail' stock.id %}" class="list-group-item list-group-item-action flex-column align-items-start"
+                           data-toggle="tooltip" data-placement="top" title="Last used at {{ stock.date_changed|date:"D d. F Y" }}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ stock.name }}</h5>
+                                {% if stock.unit %}
+                                    <h5>{{ stock.quantity }} {{ stock.unit }}</h5>
+                                {% else %}
+                                    <h5>{{ stock.quantity }} - </h5>
+                                {% endif %}
+                            </div>
+                            <!-- Editable Text -->
+                            <!-- End -->
+                            {% if stock.comment %}
+                            <p class="mb-1">{{ stock.comment }}</p>
+                            {% endif %}
+{#                            <p class="mb-1">Here should be button to delete and form to extract some.</p>#}
+                            <small class="text-muted">{{ stock.date_created|date:"D d. F Y" }}</small>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
+
+{% block properties %}
+    Here should be the form to update Properties or do some bigger changes to the stock. Or show latest Stock changes.
+{% endblock properties %}

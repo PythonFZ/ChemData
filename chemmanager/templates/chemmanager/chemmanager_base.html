@@ -1,0 +1,24 @@
+{% extends "blog/base.html" %}
+{% block base_content %}
+<main role="main" class="container">
+    <div class="row">
+        <div class="col-md-8">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+        <div class="col-md-4">
+            <div class="content-section">
+                <h3>Properties</h3>
+                <p class='text-muted'>Details for Chemical.</p>
+                {% block properties %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock base_content %}

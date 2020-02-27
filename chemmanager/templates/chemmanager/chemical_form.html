@@ -1,0 +1,23 @@
+{% extends "chemmanager/chemmanager_base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                {% if title %}
+                    <legend class="border-bottom mb-4">{{ title }} Chemical</legend>
+                    {{ form|crispy }}
+                    <button class="btn btn-outline-info" type="submit">{{ title }}!</button>
+                {% else %}
+                    <legend class="border-bottom mb-4">Create new Chemical</legend>
+                    {{ form|crispy }}
+                    <button class="btn btn-outline-info" type="submit">Add!</button>
+                {% endif %}
+                {% if delete %}
+                    <a href="{% url 'chemical-delete' chemical.id %}" class="btn btn-danger">Remove Chemical permanently!</a>
+                {% endif %}
+            </fieldset>
+        </form>
+    </div>
+{% endblock content %}
