@@ -36,9 +36,9 @@ class ChemicalListView(ListView):
             object_list = self.model.objects.filter(name__icontains=query)
         else:
             object_list = self.model.objects.all()
-        return object_list
+        return object_list.order_by('name')
+
     paginate_by = 10
-    ordering = ['name']
 
 
 class ChemicalCreateView(CreateView):
@@ -87,12 +87,23 @@ class ChemicalDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Chemical
     success_url = reverse_lazy('chemmanager-home')
 
+    def delete(self, request, *args, **kwargs):
+        chemical = self.get_object()
+        if self.request.user == chemical.creator:
+            messages.add_message(self.request, messages.INFO, f'{chemical.name} successfully removed!')
+            return super().delete(request, *args, **kwargs)
+
     def test_func(self):
         chemical = self.get_object()
         if self.request.user == chemical.creator:
             return True
         else:
             return False
+
+    def handle_no_permission(self):
+        messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                             'Please contact your group admin.')
+        return HttpResponseRedirect(self.success_url)
 
 
 class StockDetailView(DetailView):
