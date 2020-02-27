@@ -57,7 +57,6 @@ class ChemicalCreateView(CreateView):
 class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Chemical
     form_class = ChemicalCreateForm
-    success_url = reverse_lazy('chemmanager-home')
     extra_context = {
         'title': 'Update',
         'delete': True,
@@ -72,7 +71,7 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             # messages.ERROR(self.request, 'You are not permitted to apply changed! Please contact your admin!')
             messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
                                                                  'Please contact your group admin.')
-            return HttpResponseRedirect(self.success_url)
+            return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
     def test_func(self):
         # TODO Implement Test-Function for Work-Group-Check
