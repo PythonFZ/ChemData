@@ -70,6 +70,7 @@ class Extraction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
     def get_absolute_url(self):
         url = reverse('chemmanager-home') + '?q=' + self.stock.chemical.name

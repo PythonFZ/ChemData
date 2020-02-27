@@ -72,7 +72,7 @@
                             <table class="table table-sm table-striped">
                             {% for extraction in stock.extraction_set.all %}
                                 <tr>
-                                <th>{{ extraction.quantity }} {{ stock.unit }}</th>
+                                <th>{{ extraction.quantity }} {{ extraction.unit }}</th>
                                 <th>{{ extraction.comment }}</th>
                                 <th>{{ extraction.date_created }}</th>
                                 <th>{{ extraction.user.username }}</th>

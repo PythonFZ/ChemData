@@ -37,7 +37,7 @@ class ExtractionCreateForm(forms.ModelForm):
 
     class Meta:
         model = Extraction
-        fields = ('quantity', 'comment', 'date_created')
+        fields = ('quantity', 'comment', 'date_created', 'unit')
 
         widgets = {
             'anonymous': forms.CheckboxInput()
