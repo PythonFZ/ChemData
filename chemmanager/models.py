@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 
 
 class Chemical(models.Model):
@@ -23,7 +24,9 @@ class Chemical(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('chemical-detail', kwargs={'pk': self.pk})
+        url = reverse('chemmanager-home') + '?q=' + self.name
+        return url
+        # return reverse('chemical-detail', kwargs={'pk': self.pk})
 
 
 class Unit(models.Model):
