@@ -35,7 +35,8 @@ class ChemicalListView(ListView):
         else:
             object_list = self.model.objects.all()
         return object_list
-    # ordering = ['-date_posted']
+    paginate_by = 10
+    ordering = ['name']
 
 
 class ChemicalCreateView(CreateView):
