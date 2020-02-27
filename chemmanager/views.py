@@ -1,6 +1,8 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+from django.contrib import messages
 from .models import Chemical, Stock
 from .forms import ChemicalCreateForm
 
@@ -52,7 +54,7 @@ class ChemicalCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ChemicalUpdateView(UserPassesTestMixin, UpdateView):
+class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Chemical
     form_class = ChemicalCreateForm
     success_url = reverse_lazy('chemmanager-home')
@@ -63,14 +65,22 @@ class ChemicalUpdateView(UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
-        return super().form_valid(form)
+        chemical = self.get_object()
+        if self.request.user == chemical.creator:
+            return super().form_valid(form)
+        else:
+            # messages.ERROR(self.request, 'You are not permitted to apply changed! Please contact your admin!')
+            messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                                 'Please contact your group admin.')
+            return HttpResponseRedirect(self.success_url)
 
     def test_func(self):
+        # TODO Implement Test-Function for Work-Group-Check
         chemical = self.get_object()
         if self.request.user == chemical.creator:
             return True
         else:
-            return False
+            return True
 
 
 class ChemicalDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
