@@ -9,6 +9,7 @@ Install
 - conda activate ChemData
 - conda install django
 - pip install Pillow
+- pip install django-crispy-forms
 - python manage.py runserver
 (python manage.py runserver 0.0.0.0:80 to run on localhost/ + edit settings.py for mobile testing)
 
