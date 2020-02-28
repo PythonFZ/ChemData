@@ -8,7 +8,7 @@
 </script>
 
 {% block content %}
-    <form class="card card-sm mb-4">
+    <form class="card card-sm mb-2">
         <div class="card-body row no-gutters align-items-center">
             <!--end of col-->
             <div class="col">
@@ -25,17 +25,15 @@
     </form>
 
     {% for chemical in chemicals %}
-        <article class="media content-section">
-            <div class="media-body">
-                <div class="d-flex w-100 bd-highlight">
-                    <a class="btn btn-lg btn-outline-secondary mb-2 mr-auto" data-toggle="collapse"
+        <article class="media content-section mb-1">
+            <div class="media-body" >
+                <a data-toggle="collapse"
                        data-target="#collapseAll-{{ chemical.id }}"
                        aria-controls="collapseAll-{{ chemical.id }}">
-                        {{ chemical.name }}
-                    </a>
-                    <div class="m-2">{{ chemical.structure }}</div>
-                    <div class="m-2">{{ chemical.stock_set.first.quantity }} {{ chemical.stock_set.first.unit }}</div>
-                </div>
+                    <div class="d-flex w-100 bd-highlight">
+                        <h4>{{ chemical.name }}</h4>
+                    </div>
+                </a>
                 <div class="collapse" id="collapseAll-{{ chemical.id }}">
                     <form class="mb-1" action="{% url 'stock-create' chemical.id %}">
                         <button class="btn btn-info btn-sm" type="button" data-toggle="collapse"

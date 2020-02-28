@@ -8,8 +8,10 @@
                 <h2>Are you sure you want to delete the post "{{ object.name }}" permanently?</h2>
             </fieldset>
             <div class="form-group">
-                <button class="btn btn-danger" type="submit">Remove Permanently!</button>
-                <a class="btn btn-secondary" href="{% url 'chemical-detail' object.id %}">Cancel</a>
+                <div class="d-flex w-100 justify-content-between">
+                    <button class="btn btn-danger" type="submit">Remove Permanently!</button>
+                    <a class="btn btn-secondary" href="{% url 'chemical-detail' object.id %}">Cancel</a>
+                </div>
             </div>
         </form>
     </div>
