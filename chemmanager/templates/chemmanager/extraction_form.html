@@ -2,16 +2,89 @@
 {% load crispy_forms_tags %}
 {% block content %}
     <div class="content-section">
-    <form method="POST">
-        {% csrf_token %}
-        <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Create new Extraction</legend>
-            <div class="border-bottom">
-                {{ object }}
-            </div>
-            {{ form|crispy }}
-            <button class="btn btn-outline-info" type="submit">Add!</button>
-        </fieldset>
-    </form>
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Create new Extraction for {{ stock.chemical }} ({{ stock.name }})
+                </legend>
+                {{ form|crispy }}
+                <button class="btn btn-outline-info" type="submit">Add!</button>
+            </fieldset>
+        </form>
     </div>
 {% endblock content %}
+
+{% block properties %}
+        <div class="content-section">
+            <div class="d-flex w-100 justify-content-between article-metadata">
+            <a href="{% url 'chemical-update' stock.chemical.id %}" class="btn btn-warning mb-2">Edit Chemical</a>
+            <a href="{% url 'stock-delete' stock.id %}" class="btn btn-danger mb-2">Remove Stock</a>
+            </div>
+        <div>
+            <table class="table table-sm table-light">
+                <thead class="thead-light">
+                <tr>
+                    <th>Chemical</th>
+                    <th colspan="2" class="text-center">{{ stock.chemical.name }}</th>
+                </tr>
+                </thead>
+                {% if stock.chemical.molar_mass %}
+                    <tr>
+                        <th>Molar Mass</th>
+                        <th class="text-right">{{ stock.chemical.molar_mass }}</th>
+                        <th> \(\mathrm{g}\cdot\mathrm{mol}^{-1}\)</th>
+                    </tr>
+                {% endif %}
+                {% if stock.chemical.boiling_point %}
+                    <tr>
+                        <th>Boiling Point</th>
+                        <th class="text-right">{{ stock.chemical.boiling_point }}</th>
+                        <th>°C</th>
+                    </tr>
+                {% endif %}
+                {% if stock.chemical.melting_point %}
+                    <tr>
+                        <th>Melting Point</th>
+                        <th class="text-right">{{ stock.chemical.melting_point }}</th>
+                        <th>°C</th>
+                    </tr>
+                {% endif %}
+                {% if stock.chemical.density %}
+                    <tr>
+                        <th>Density</th>
+                        <th class="text-right">{{ stock.chemical.density }}</th>
+                        <th> \(\mathrm{g} \cdot \mathrm{cm}^{-3}\)</th>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+    <div class="content-section">
+    <div class="d-flex w-100 justify-content-between article-metadata">
+        <h5>Available Quantity </h5> <h5> {{ left_quantity }} {{ stock.unit }}</h5>
+    </div>
+    <div>
+        <table class="table table-sm table-light">
+            <thead class="thead-light">
+            <tr>
+                <th colspan="2">Quantity</th>
+                <th>Date</th>
+                <th>User</th>
+            </tr>
+            </thead>
+            {% for extraction in stock.extraction_set.all %}
+                <tr>
+                    <th class="text-right">{{ extraction.quantity }} </th>
+                    <th>{{ extraction.unit }}</th>
+                    <th>{{ extraction.date_created|date:"d.m.Y" }}</th>
+                    <th>{{ extraction.user.username }}</th>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}
+
+{% block custom_js %}
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}

@@ -54,8 +54,8 @@ class Stock(models.Model):
     def __str__(self):
         return self.name
 
-    # def get_absolute_url(self):
-    #     return reverse('stock-detail', kwargs={'pk': self.pk})
+    class Meta:
+        ordering = ['-date_changed']
 
     def get_absolute_url(self):
         url = reverse('chemmanager-home') + '?q=' + self.chemical.name
@@ -75,4 +75,7 @@ class Extraction(models.Model):
     def get_absolute_url(self):
         url = reverse('chemmanager-home') + '?q=' + self.stock.chemical.name
         return url
+
+    class Meta:
+        ordering = ['-date_created']
 

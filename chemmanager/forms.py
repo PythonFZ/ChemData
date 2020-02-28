@@ -36,11 +36,13 @@ class ExtractionCreateForm(forms.ModelForm):
     anonymous = forms.BooleanField(required=False, label='stay anonymous')
 
     class Meta:
+
         model = Extraction
-        fields = ('quantity', 'comment', 'date_created', 'unit')
+        fields = ('quantity', 'unit', 'comment', 'date_created')
 
         widgets = {
-            'anonymous': forms.CheckboxInput()
+            'anonymous': forms.CheckboxInput(),
+            'comment': forms.Textarea(attrs={'rows': 4})
         }
 
 # name = models.CharField(max_length=250)

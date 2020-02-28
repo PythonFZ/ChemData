@@ -13,14 +13,7 @@
             {% block content %}{% endblock %}
         </div>
         <div class="col-md-4">
-            <div class="content-section">
-                <a href="{% url 'chemical-create' %}" class="btn btn-info">Add Chemical</a>
-            </div>
-            <div class="content-section">
-                <h3>Properties</h3>
-                <p class='text-muted'>Details for Chemical.</p>
-                {% block properties %}{% endblock %}
-            </div>
+            {% block properties %}{% endblock %}
         </div>
     </div>
 </main>

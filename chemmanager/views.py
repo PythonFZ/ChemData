@@ -79,7 +79,12 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if self.request.user == chemical.creator:
             return True
         else:
-            return True
+            return False
+
+    def handle_no_permission(self):
+        messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                             'Please contact your group admin.')
+        return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
 
 class ChemicalDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -102,7 +107,28 @@ class ChemicalDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def handle_no_permission(self):
         messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
                                                              'Please contact your group admin.')
-        return HttpResponseRedirect(self.success_url)
+        return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
+
+
+class StockDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Stock
+    success_url = reverse_lazy('chemmanager-home')
+
+    def delete(self, request, *args, **kwargs):
+        # TODO Arbeitskreis-Check!!
+        stock = self.get_object()
+        # if self.request.user == stock.creator:
+        messages.add_message(self.request, messages.INFO, f'{stock.name} successfully removed!')
+        return super().delete(request, *args, **kwargs)
+
+    def test_func(self):
+        # TODO Arbeitskreis-Check!!
+        return True
+
+    def handle_no_permission(self):
+        messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                             'Please contact your group admin.')
+        return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
 
 class StockUpdateView(UpdateView):
@@ -113,6 +139,25 @@ class StockUpdateView(UpdateView):
 class ExtractionCreateView(CreateView):
     model = Extraction
     form_class = ExtractionCreateForm
+
+    def get_form(self, form_class=None):
+        """Get unit from the associated stock"""
+        form = super().get_form(form_class)
+        form['unit'].initial = Stock.objects.get(id=self.kwargs['pk']).unit
+        return form
+
+    def get_context_data(self, **kwargs):
+        stock = Stock.objects.get(id=self.kwargs['pk'])
+        extractions = stock.extraction_set.all()
+        # TODO Use units!
+        left_quantity = stock.quantity
+        for extraction in extractions:
+            left_quantity -= extraction.quantity
+        kwargs.update({
+            'stock': stock,
+            'left_quantity': left_quantity,
+        })
+        return super(ExtractionCreateView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
         if self.request.POST.get('anonymous'):
