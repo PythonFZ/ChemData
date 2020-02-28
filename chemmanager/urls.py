@@ -13,7 +13,7 @@ from . import views
 
 urlpatterns = [
     path('', login_required(ChemicalListView.as_view()), name='chemmanager-home'),
-    path('chemical/<int:pk>/update', ChemicalUpdateView.as_view(), name='chemical-detail'),
+    path('chemical/<int:pk>/update', ChemicalUpdateView.as_view(), name='chemical-update'),
     path('chemical/new/', login_required(ChemicalCreateView.as_view()), name='chemical-create'),
     path('stock/<int:pk>/new/', login_required(StockCreateView.as_view()), name='stock-create'),
     path('stock/<int:pk>/', login_required(StockUpdateView.as_view()), name='stock-update'),

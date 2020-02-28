@@ -6,6 +6,9 @@
         {% csrf_token %}
         <fieldset class="form-group">
             <legend class="border-bottom mb-4">Create new Extraction</legend>
+            <div class="border-bottom">
+                {{ object }}
+            </div>
             {{ form|crispy }}
             <button class="btn btn-outline-info" type="submit">Add!</button>
         </fieldset>
