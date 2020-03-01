@@ -30,6 +30,9 @@
                 </a>
                 <div class="collapse" id="collapseAll-{{ chemical.id }}">
                     <form class="mb-1" action="{% url 'stock-create' chemical.id %}">
+                        {% if request.user_agent.is_mobile %}
+                            <div class="d-flex justify-content-between w-100">
+                        {% endif %}
                         <button class="btn btn-info btn-sm" type="button" data-toggle="collapse"
                                 data-target="#collapseStock-{{ chemical.id }}" aria-expanded="true"
                                 aria-controls="collapseStock-{{ chemical.id }}">Stock
@@ -42,7 +45,11 @@
                                 value="{{ chemical.id }}">Add Stock
                         </button>
                         <a class="btn btn-warning btn-sm" href="{% url 'chemical-update' chemical.id %}">Edit</a>
+                        {% if request.user_agent.is_mobile %}
+                            </div>
+                        {% endif %}
                     </form>
+
                     <div class="collapse" id="collapseProperties-{{ chemical.id }}">
                         <dl class="row">
                             {% if chemical.molar_mass %}
@@ -95,7 +102,7 @@
                                         {% else %}
                                             <th>-</th>
                                         {% endif %}
-                                        <th>{{ stock.extraction_set.last.date_created|date:"D d. F Y" }}</th>
+                                        <th>{{ stock.extraction_set.last.date_created|date:"d.m.Y" }}</th>
                                     {% endif %}
                                 </tr>
                             {% endfor %}
