@@ -51,6 +51,14 @@ class Stock(models.Model):
     chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE, blank=True, null=True)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, blank=True, null=True)
 
+    @property
+    def left_quantity(self):
+        left_quantity = self.quantity
+        for extraction in self.extraction_set.all():
+            left_quantity -= extraction.quantity
+
+        return left_quantity
+
     def __str__(self):
         return self.name
 

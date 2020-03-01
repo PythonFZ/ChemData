@@ -1,6 +1,6 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from .models import Chemical, Stock, Extraction
@@ -32,10 +32,14 @@ class ChemicalListView(ListView):
     extra_context = {'title': 'Chemical Manager'}
 
     # def get_context_data(self, **kwargs):
-    #     user_agent = get_user_agent(self.request)
-    #     kwargs.update({
-    #         'is_pc': user_agent.is_pc,
-    #     })
+    #     for chemical in self.model.objects.all():
+    #         for stock in chemical.stock_set.all():
+    #             quantity = 0
+    #             for extraction in stock.extraction_set.all():
+    #                 quantity += extraction.quantity
+    #             kwargs.update({
+    #                 f'stock_left_{stock.id}': quantity
+    #             })
     #     return super(ChemicalListView, self).get_context_data(**kwargs)
 
     def get_queryset(self):
@@ -173,5 +177,11 @@ class ExtractionCreateView(CreateView):
         else:
             form.instance.user = self.request.user
         form.instance.stock = Stock.objects.get(id=self.kwargs['pk'])
+
+        stock = Stock.objects.get(id=self.kwargs['pk'])
+        if (stock.left_quantity - form.cleaned_data.get('quantity')) <= 0:
+            path = reverse('stock-delete', args=[stock.id])
+            messages.add_message(self.request, messages.WARNING,
+                                 f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>', extra_tags='safe')
 
         return super().form_valid(form)

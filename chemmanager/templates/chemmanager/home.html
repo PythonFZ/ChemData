@@ -87,7 +87,7 @@
                                            class="btn btn-outline-info btn-sm w-100"
                                            data-toggle="tooltip" data-html="true"
                                            title="Last Used {{ stock.extraction_set.last.date_created|date:"D d. F Y" }}"
-                                        >{{ stock.quantity }} {{ stock.unit }}</a>
+                                        >{{ stock.left_quantity }} {{ stock.unit }}</a>
                                     </th>
                                     {% if request.user_agent.is_pc %}
                                         {% if stock.comment %}

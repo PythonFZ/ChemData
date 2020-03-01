@@ -5,8 +5,8 @@
         <div class="col-md-8">
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
+                    <div class="alert alert-{{ message.level_tag }}">
+                        {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
                     </div>
                 {% endfor %}
             {% endif %}
