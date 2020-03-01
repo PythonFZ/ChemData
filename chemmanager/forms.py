@@ -6,11 +6,12 @@ class ChemicalCreateForm(forms.ModelForm):
 
     class Meta:
         model = Chemical
-        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment')
+        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment', 'group')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
-            'comment': forms.Textarea(attrs={'rows': 4})
+            'comment': forms.Textarea(attrs={'rows': 4}),
+            'group': forms.SelectMultiple(),
         }
 
         html_script = '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + \

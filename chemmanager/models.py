@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -19,6 +19,7 @@ class Chemical(models.Model):
     cas = models.CharField(max_length=100, blank=True, null=True)
 
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    group = models.ManyToManyField(Group)
 
     def __str__(self):
         return self.name

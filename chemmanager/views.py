@@ -45,9 +45,10 @@ class ChemicalListView(ListView):
     def get_queryset(self):
         query = self.request.GET.get('q')
         if query:
-            object_list = self.model.objects.filter(name__icontains=query)
+            object_list = self.model.objects.filter(name__icontains=query, group__in=self.request.user.groups.all())
         else:
-            object_list = self.model.objects.all()
+            object_list = self.model.objects.filter(group__in=self.request.user.groups.all())
+
         return object_list.order_by('name')
 
     paginate_by = 10
@@ -62,8 +63,27 @@ class ChemicalCreateView(CreateView):
     }
 
     def form_valid(self, form):
-        form.instance.creator = self.request.user
-        return super().form_valid(form)
+        # TODO add all fields!
+        instance = Chemical.objects.create(creator=self.request.user,
+                                           name=form.cleaned_data.get('name'),
+                                           structure=form.cleaned_data.get('structure'),
+                                           molar_mass=form.cleaned_data.get('molar_mass'),
+                                           density=form.cleaned_data.get('density'),
+                                           melting_point=form.cleaned_data.get('melting_point'),
+                                           boiling_point=form.cleaned_data.get('boiling_point'),
+                                           comment=form.cleaned_data.get('comment')
+                                           )
+        instance.group.set(self.request.user.groups.all())
+        url = reverse('chemmanager-home') + '?q=' + instance.name
+        return HttpResponseRedirect(url)
+
+        # return super().form_valid(form)
+
+    def get_form(self, form_class=None):
+        """Get unit from the associated stock"""
+        form = super().get_form(form_class)
+        form['group'].initial = self.request.user.groups.all()
+        return form
 
 
 class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -86,7 +106,6 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
     def test_func(self):
-        # TODO Implement Test-Function for Work-Group-Check
         chemical = self.get_object()
         if self.request.user == chemical.creator:
             return True
@@ -127,15 +146,18 @@ class StockDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('chemmanager-home')
 
     def delete(self, request, *args, **kwargs):
-        # TODO Arbeitskreis-Check!!
         stock = self.get_object()
-        # if self.request.user == stock.creator:
         messages.add_message(self.request, messages.INFO, f'{stock.name} successfully removed!')
         return super().delete(request, *args, **kwargs)
 
     def test_func(self):
-        # TODO Arbeitskreis-Check!!
-        return True
+        """Check if User is in group and allowed to remove Stock"""
+        stock = self.get_object()
+        chemical = Chemical.objects.filter(stock=stock)
+        if chemical.filter(group__in=self.request.user.groups.all()).count() > 0:
+            return True
+        else:
+            return False
 
     def handle_no_permission(self):
         messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
@@ -148,7 +170,7 @@ class StockUpdateView(UpdateView):
     form_class = StockUpdateForm
 
 
-class ExtractionCreateView(CreateView):
+class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Extraction
     form_class = ExtractionCreateForm
 
@@ -185,3 +207,16 @@ class ExtractionCreateView(CreateView):
                                  f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>', extra_tags='safe')
 
         return super().form_valid(form)
+
+    def test_func(self):
+        """Check if User is in group and allowed to remove Stock"""
+        chemical = Chemical.objects.filter(stock=Stock.objects.get(id=self.kwargs['pk']))
+        if chemical.filter(group__in=self.request.user.groups.all()).count() > 0:
+            return True
+        else:
+            return False
+
+    def handle_no_permission(self):
+        messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                             'Please contact your group admin.')
+        return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
