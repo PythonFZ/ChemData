@@ -1,11 +1,5 @@
 {% extends "chemmanager/chemmanager_base.html" %}
-{% load crispy_forms_tags %}
-
-<script>
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
-</script>
+{#{% load crispy_forms_tags %}#}
 
 {% block content %}
     <form class="card card-sm mb-2">
@@ -26,10 +20,10 @@
 
     {% for chemical in chemicals %}
         <article class="media content-section mb-1">
-            <div class="media-body" >
+            <div class="media-body">
                 <a data-toggle="collapse"
-                       data-target="#collapseAll-{{ chemical.id }}"
-                       aria-controls="collapseAll-{{ chemical.id }}">
+                   data-target="#collapseAll-{{ chemical.id }}"
+                   aria-controls="collapseAll-{{ chemical.id }}">
                     <div class="d-flex w-100 bd-highlight">
                         <h4>{{ chemical.name }}</h4>
                     </div>
@@ -70,33 +64,42 @@
                         </dl>
                     </div>
                     <div class="collapse show" id="collapseStock-{{ chemical.id }}">
-                        {% for stock in chemical.stock_set.all %}
-                            <div class="list-group">
-                                <div class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <a class="h5" href="{% url 'stock-update' stock.id %}">{{ stock.name }}</a>
-                                        {% if stock.unit %}
-                                            <a class="h5 btn btn-outline-info" data-toggle="tooltip"
-                                               data-placement="top"
-                                               title="Create new Extraction"
-                                               href="{% url 'extraction-create' stock.id %}">
-                                                {{ stock.quantity }} {{ stock.unit }}
-                                            </a>
+                        <table class="table">
+                            <thead class="thead-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                {% if request.user_agent.is_pc %}
+                                    <th>Comment</th>
+                                    <th>Last used</th>
+                                {% endif %}
+                            </tr>
+                            </thead>
+
+                            {% for stock in chemical.stock_set.all %}
+                                <tr>
+                                    <th>
+                                        <a href="{% url 'stock-update' stock.id %}"
+                                           class="btn btn-sm btn-outline-primary w-100">{{ stock.name }}</a>
+                                    </th>
+                                    <th>
+                                        <a href="{% url 'extraction-create' stock.id %}"
+                                           class="btn btn-outline-info btn-sm w-100"
+                                           data-toggle="tooltip" data-html="true"
+                                           title="Last Used {{ stock.extraction_set.last.date_created|date:"D d. F Y" }}"
+                                        >{{ stock.quantity }} {{ stock.unit }}</a>
+                                    </th>
+                                    {% if request.user_agent.is_pc %}
+                                        {% if stock.comment %}
+                                            <th>{{ stock.comment }}</th>
                                         {% else %}
-                                            <h5>{{ stock.quantity }} - </h5>
+                                            <th>-</th>
                                         {% endif %}
-                                    </div>
-                                    <!-- Just temporary table -->
-                                    <!-- Editable Text -->
-                                    <!-- End -->
-                                    {% if stock.comment %}
-                                        <p class="mb-1">{{ stock.comment }}</p>
+                                        <th>{{ stock.extraction_set.last.date_created|date:"D d. F Y" }}</th>
                                     {% endif %}
-                                    {#                            <p class="mb-1">Here should be button to delete and form to extract some.</p>#}
-                                    <small class="text-muted">{{ stock.date_created|date:"D d. F Y" }}</small>
-                                </div>
-                            </div>
-                        {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </table>
                     </div>
                 </div>
             </div>
@@ -124,10 +127,24 @@
             <a class="btn btn-outline-info mb-4" href="?page={{ paginator.num_pages }}">Last</a>
         {% endif %}
     {% endif %}
+
 {% endblock content %}
 
 {% block properties %}
     <div class="content-section">
         <a href="{% url 'chemical-create' %}" class="btn btn-info">Add Chemical</a>
     </div>
+    <a class="article-title" href="#" data-toggle="tooltip" data-html="true" title="<img src='/media/default.jpg'>">IMG-Tooltip</a>
 {% endblock properties %}
+
+
+
+
+
+{% block custom_js %}
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+{% endblock %}

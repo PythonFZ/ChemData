@@ -29,7 +29,7 @@ class StockUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Stock
-        fields = ('name', 'quantity', 'unit', 'chemical')
+        fields = ('name', 'quantity', 'unit', 'chemical', 'comment')
 
 
 class ExtractionCreateForm(forms.ModelForm):

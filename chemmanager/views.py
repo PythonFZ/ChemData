@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from .models import Chemical, Stock, Extraction
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
+# from django_user_agents.utils import get_user_agent
 
 
 class StockCreateView(CreateView):
@@ -29,6 +30,13 @@ class ChemicalListView(ListView):
     template_name = 'chemmanager/home.html'
     context_object_name = 'chemicals'
     extra_context = {'title': 'Chemical Manager'}
+
+    # def get_context_data(self, **kwargs):
+    #     user_agent = get_user_agent(self.request)
+    #     kwargs.update({
+    #         'is_pc': user_agent.is_pc,
+    #     })
+    #     return super(ChemicalListView, self).get_context_data(**kwargs)
 
     def get_queryset(self):
         query = self.request.GET.get('q')
