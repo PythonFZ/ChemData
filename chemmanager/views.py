@@ -3,14 +3,29 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from .models import Chemical, Stock, Extraction
+from .models import Chemical, Stock, Extraction, Storage
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
 # from django_user_agents.utils import get_user_agent
 
 
 class StockCreateView(CreateView):
     model = Stock
-    fields = ('name', 'quantity', 'unit')
+    # fields = ('name', 'quantity', 'unit', 'storage')
+    form_class = StockUpdateForm
+
+    def get_form_kwargs(self):
+        """
+        There are two possibilities to share chemicals:
+        1. Share the Chemical (Stocks can be created, Extractions can be created, Chemical can not be edited)
+        2. Share the Storage (Storage-Place is shared)
+        # TODO Shared Storage-Chemicals should automatically fulfill shared chemicals!
+        # TODO At this moment it is not favourable to share storage. Better Share chemicals!
+        """
+        kwargs = super(StockCreateView, self).get_form_kwargs()
+        kwargs.update({
+            'request': self.request,
+        })
+        return kwargs
 
     def form_valid(self, form):
         chemical_id = self.request.GET.get('chemical')
@@ -168,6 +183,13 @@ class StockDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class StockUpdateView(UpdateView):
     model = Stock
     form_class = StockUpdateForm
+
+    def get_form_kwargs(self):
+        kwargs = super(StockUpdateView, self).get_form_kwargs()
+        kwargs.update({
+            'request': self.request,
+        })
+        return kwargs
 
 
 class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Chemical, Stock, Extraction
+from .models import Chemical, Stock, Extraction, Storage
 
 
 class ChemicalCreateForm(forms.ModelForm):
@@ -28,9 +28,15 @@ class ChemicalCreateForm(forms.ModelForm):
 
 class StockUpdateForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop('request')
+        super(StockUpdateForm, self).__init__(*args, **kwargs)
+        print(request.user.groups.all())
+        self.fields['storage'].queryset = Storage.objects.filter(group__in=request.user.groups.all())
+
     class Meta:
         model = Stock
-        fields = ('name', 'quantity', 'unit', 'chemical', 'comment')
+        fields = ('name', 'quantity', 'unit', 'comment', 'storage')
 
 
 class ExtractionCreateForm(forms.ModelForm):

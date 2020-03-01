@@ -40,6 +40,15 @@ class Unit(models.Model):
         return self.name
 
 
+class Storage(models.Model):
+    name = models.CharField(max_length=250)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    group = models.ManyToManyField(Group)
+
+    def __str__(self):
+        return self.name
+
+
 class Stock(models.Model):
 
     name = models.CharField(max_length=250)
@@ -50,6 +59,7 @@ class Stock(models.Model):
     date_changed = models.DateTimeField(auto_now=True)
 
     chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE, blank=True, null=True)
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE, blank=True, null=True)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, blank=True, null=True)
 
     @property
@@ -87,4 +97,5 @@ class Extraction(models.Model):
 
     class Meta:
         ordering = ['-date_created']
+
 
