@@ -4,10 +4,10 @@ import os.path
 
 
 class PubChemLoader:
-    def __init__(self, chemical: Chemical):
-        self.chemical = chemical
+    def __init__(self, chemical_name):
+        self.chemical_name = chemical_name
         try:
-            self.compound = pcp.get_compounds(self.chemical.name, 'name')[0]
+            self.compound = pcp.get_compounds(self.chemical_name, 'name')[0]
         except IndexError:
             print('Could not get any data')
             self.compound = None

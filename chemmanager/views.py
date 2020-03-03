@@ -6,6 +6,8 @@ from django.contrib import messages
 from .models import Chemical, Stock, Extraction
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
 from .utils import PubChemLoader
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Button
 
 
 class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -80,13 +82,42 @@ class ChemicalCreateView(CreateView):
         'title': 'Add'
     }
 
-    def form_valid(self, form):
-        form.instance.creator = self.request.user
-        form.instance.workgroup = self.request.user.profile.workgroup
-        return super().form_valid(form)
+    def form_valid(self, form, **kwargs):
+        """Load Data from PubChem if button is pressed"""
+        # TODO add Image download
+        # TODO add all other dicts like density, melting point, etc.. add else!
+        if 'check_pubchem' in self.request.POST:
+            pubchemloader = PubChemLoader(chemical_name=form.cleaned_data.get('name'))
+            if pubchemloader.compound is not None:
+
+                inital_dict = {'name': form.cleaned_data.get('name')}
+                inital_dict['name'] = pubchemloader.compound.iupac_name
+                if form.cleaned_data.get('structure') is None:
+                    inital_dict['structure'] = pubchemloader.compound.molecular_formula
+                else:
+                    inital_dict['structure'] = form.cleaned_data.get('structure')
+                if form.cleaned_data.get('molar_mass') is None:
+                    inital_dict['molar_mass'] = pubchemloader.compound.molecular_weight
+                else:
+                    inital_dict['molar_mass'] = form.cleaned_data.get('molar_mass')
+                # if form.cleaned_data.get('image') is None:
+                #     inital_dict['image'] = pubchemloader.load_img()
+
+                context = self.get_context_data(**kwargs)
+                context['form'] = ChemicalCreateForm(initial=inital_dict)
+                return self.render_to_response(context)
+            else:
+                form.instance.creator = self.request.user
+                form.instance.workgroup = self.request.user.profile.workgroup
+                messages.add_message(self.request, messages.WARNING,
+                                     f'Could not find Substance on PubChem!')
+                return super().form_valid(form)
+        else:
+            form.instance.creator = self.request.user
+            form.instance.workgroup = self.request.user.profile.workgroup
+            return super().form_valid(form)
 
     def get_form(self, form_class=None):
-        """Get unit from the associated stock"""
         form = super().get_form(form_class)
         return form
 
@@ -103,13 +134,6 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         """Get unit from the associated stock"""
         # TODO Clean order, so pubchem only gets queried when necessary!
         form = super().get_form(form_class)
-        chemical = self.get_object()
-        pubchemloader = PubChemLoader(chemical)
-        if pubchemloader.compound is not None:
-            if chemical.molar_mass is None:
-                form['molar_mass'].initial = pubchemloader.compound.molecular_weight
-            if chemical.structure is None:
-                form['structure'].initial = pubchemloader.compound.molecular_formula
         return form
 
     def dispatch(self, request, *args, **kwargs):
@@ -118,14 +142,6 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def form_valid(self, form):
         form.instance.creator = self.request.user
         chemical = self.get_object()
-        # TODO Code Cleanup
-        if form.cleaned_data.get('image') == 'chemical_pics/default.png':
-            pubchemloader = PubChemLoader(chemical=chemical)
-            if pubchemloader.compound is not None:
-                form.instance.image = pubchemloader.load_img()
-            else:
-                messages.add_message(self.request, messages.WARNING,
-                                     f'Image for chemical {chemical.name} not found!')
 
         if self.request.user == chemical.creator:
             return super().form_valid(form)
