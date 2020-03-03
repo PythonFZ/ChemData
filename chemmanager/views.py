@@ -5,6 +5,8 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from .models import Chemical, Stock, Extraction, Storage
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
+
+
 # from django_user_agents.utils import get_user_agent
 
 
@@ -53,15 +55,22 @@ class ChemicalListView(ListView):
     model = Chemical
     template_name = 'chemmanager/home.html'
     context_object_name = 'chemicals'
-    extra_context = {'title': 'Chemical Manager'}
+    extra_context = {
+        'title': 'Chemical Manager',
+        'chemical_detail': None,
+    }
 
     def get_queryset(self):
+
+        if 'pk' in self.kwargs:
+            self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
+            # object_list = Chemical.objects.filter(pk=self.kwargs['pk'])
+        object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup) | \
+                      Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup)
+
         query = self.request.GET.get('q')
         if query:
-            object_list = self.model.objects.filter(name__icontains=query)
-        else:
-            object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup) | \
-                          Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup)
+            object_list = object_list.filter(name__icontains=query)
 
         return object_list.order_by('name').distinct()
 
@@ -225,7 +234,8 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if (stock.left_quantity - form.cleaned_data.get('quantity')) <= 0:
             path = reverse('stock-delete', args=[stock.id])
             messages.add_message(self.request, messages.WARNING,
-                                 f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>', extra_tags='safe')
+                                 f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>',
+                                 extra_tags='safe')
 
         return super().form_valid(form)
 
@@ -233,8 +243,9 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         """Check if User is in group and allowed to add Extraction
         Allow if stock_storage_workgroup is in workgroup of the user or if stock has no workgroup"""
         my_stock = Stock.objects.filter(id=self.kwargs['pk'])
-        if my_stock.filter(storage__workgroup=self.request.user.profile.workgroup).count() > 0 or\
-                Chemical.objects.filter(workgroup=self.request.user.profile.workgroup, stock=my_stock.first()).count() > 0:
+        if my_stock.filter(storage__workgroup=self.request.user.profile.workgroup).count() > 0 or \
+                Chemical.objects.filter(workgroup=self.request.user.profile.workgroup,
+                                        stock=my_stock.first()).count() > 0:
             return True
 
         else:

@@ -49,7 +49,7 @@
                                 value="{{ chemical.id }}">Add Stock
                         </button>
                         <a class="btn btn-warning btn-sm" href="{% url 'chemical-update' chemical.id %}">Edit</a>
-                        <a href="{% url 'chemical-list' chemical.id %}" class="btn btn-sm btn-info">Detail</a>
+                        <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-info">Detail</a>
                         {% if request.user_agent.is_mobile %}
                             </div>
                         {% endif %}
@@ -149,6 +149,14 @@
         <a href="{% url 'chemical-create' %}" class="btn btn-info">Add Chemical</a>
     </div>
     <a class="article-title" href="#" data-toggle="tooltip" data-html="true" title="<img src='/media/default.jpg'>">IMG-Tooltip</a>
+    {% if chemical_detail %}
+        <div class="content-section">
+            <h5>{{ chemical_detail.name }}</h5>
+            <div class="article-content">This can display some comment or img or whatever about the selected chemical!</div>
+        </div>
+    {% endif %}
+
+
 {% endblock properties %}
 
 
