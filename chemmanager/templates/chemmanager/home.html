@@ -21,9 +21,7 @@
     {% for chemical in chemicals %}
         <article class="media content-section mb-1">
             <div class="media-body">
-                <a data-toggle="collapse"
-                   data-target="#collapseAll-{{ chemical.id }}"
-                   aria-controls="collapseAll-{{ chemical.id }}">
+                <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}" class="expand-chemical" id="{{ chemical.id }}">
                     <div class="d-flex w-100 bd-highlight">
                         {% if request.user.profile.workgroup == chemical.workgroup %}
                             <h4>{{ chemical.name }}</h4>
@@ -49,7 +47,6 @@
                                 value="{{ chemical.id }}">Add Stock
                         </button>
                         <a class="btn btn-warning btn-sm" href="{% url 'chemical-update' chemical.id %}">Edit</a>
-                        <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-info">Detail</a>
                         {% if request.user_agent.is_mobile %}
                             </div>
                         {% endif %}
@@ -167,6 +164,7 @@
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
+
             $('.collapse').each(function () {
                 // Default close unless saved as open
                 if (localStorage.getItem('open_' + this.id) === 'open') {
@@ -176,10 +174,13 @@
         });
     </script>
     <script>
-        $('.collapse').on('show.bs.collapse', function () {
-            localStorage.setItem('open_' + this.id, 'open')
-        }).on('hide.bs.collapse', function () {
-            localStorage.removeItem('open_' + this.id)
+        $('.expand-chemical').click(function () {
+            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) === 'open'){
+                localStorage.removeItem('open_' + 'collapseAll-' + this.id)
+            }
+            else {
+                localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open')
+            }
         });
     </script>
 {% endblock %}
