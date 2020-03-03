@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  chemdata_db:
+    image: postgres
+  chemdata_web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "4443:8000"
+    depends_on:
+      - chemdata_db
+
+# networks:
+#   default:
+#     external:
+#       name: home_net
