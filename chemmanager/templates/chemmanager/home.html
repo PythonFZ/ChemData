@@ -148,11 +148,11 @@
     <div class="content-section">
         <a href="{% url 'chemical-create' %}" class="btn btn-info">Add Chemical</a>
     </div>
-    <a class="article-title" href="#" data-toggle="tooltip" data-html="true" title="<img src='/media/default.jpg'>">IMG-Tooltip</a>
     {% if chemical_detail %}
         <div class="content-section">
             <h5>{{ chemical_detail.name }}</h5>
             <div class="article-content">This can display some comment or img or whatever about the selected chemical!</div>
+            <img src="{{ chemical_detail.image.url }}" alt="not found">
         </div>
     {% endif %}
 

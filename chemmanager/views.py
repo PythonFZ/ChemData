@@ -3,16 +3,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from .models import Chemical, Stock, Extraction, Storage
+from .models import Chemical, Stock, Extraction
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
-
-
-# from django_user_agents.utils import get_user_agent
+from .utils import PubChemLoader
 
 
 class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Stock
-    # fields = ('name', 'quantity', 'unit', 'storage')
     form_class = StockUpdateForm
 
     def get_form_kwargs(self):
@@ -38,7 +35,6 @@ class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
         """Only Workgroup-Members are allowed to edit, Shared Groups are only permitted to create extractions!
         Otherwise Members of different Groups could change storage, which is not allowed"""
-        chemical_id = self.request.GET.get('chemical')
         if Chemical.objects.filter(id=self.request.GET.get('chemical'),
                                    workgroup=self.request.user.profile.workgroup).count() > 0:
             return True
@@ -64,7 +60,7 @@ class ChemicalListView(ListView):
 
         if 'pk' in self.kwargs:
             self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
-            # object_list = Chemical.objects.filter(pk=self.kwargs['pk'])
+
         object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup) | \
                       Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup)
 
@@ -80,7 +76,6 @@ class ChemicalListView(ListView):
 class ChemicalCreateView(CreateView):
     model = Chemical
     form_class = ChemicalCreateForm
-    # success_url =
     extra_context = {
         'title': 'Add'
     }
@@ -104,13 +99,37 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         'delete': True,
     }
 
+    def get_form(self, form_class=None):
+        """Get unit from the associated stock"""
+        # TODO Clean order, so pubchem only gets queried when necessary!
+        form = super().get_form(form_class)
+        chemical = self.get_object()
+        pubchemloader = PubChemLoader(chemical)
+        if pubchemloader.compound is not None:
+            if chemical.molar_mass is None:
+                form['molar_mass'].initial = pubchemloader.compound.molecular_weight
+            if chemical.structure is None:
+                form['structure'].initial = pubchemloader.compound.molecular_formula
+        return form
+
+    def dispatch(self, request, *args, **kwargs):
+        return super(ChemicalUpdateView, self).dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.creator = self.request.user
         chemical = self.get_object()
+        # TODO Code Cleanup
+        if form.cleaned_data.get('image') == 'chemical_pics/default.png':
+            pubchemloader = PubChemLoader(chemical=chemical)
+            if pubchemloader.compound is not None:
+                form.instance.image = pubchemloader.load_img()
+            else:
+                messages.add_message(self.request, messages.WARNING,
+                                     f'Image for chemical {chemical.name} not found!')
+
         if self.request.user == chemical.creator:
             return super().form_valid(form)
         else:
-            # messages.ERROR(self.request, 'You are not permitted to apply changed! Please contact your admin!')
             messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
                                                                  'Please contact your group admin.')
             return HttpResponseRedirect(reverse_lazy('chemmanager-home'))

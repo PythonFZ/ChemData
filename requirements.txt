@@ -5,3 +5,4 @@ pyyaml
 ua-parser
 user-agents
 django-user-agents
+pubchempy

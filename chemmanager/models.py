@@ -8,7 +8,7 @@ from users.models import Workgroup
 class Chemical(models.Model):
 
     name = models.CharField(max_length=250)
-    structure = models.CharField(max_length=250, blank=True)
+    structure = models.CharField(max_length=250, blank=True, null=True)
     molar_mass = models.FloatField(blank=True, null=True)
     density = models.FloatField(blank=True, null=True)
     melting_point = models.FloatField(blank=True, null=True)
@@ -17,6 +17,7 @@ class Chemical(models.Model):
     comment = models.TextField(blank=True)
     cid = models.CharField(max_length=100, blank=True, null=True)
     cas = models.CharField(max_length=100, blank=True, null=True)
+    image = models.ImageField(default='chemical_pics/default.png', upload_to='chemical_pics')
 
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, blank=True, null=True)
@@ -27,7 +28,6 @@ class Chemical(models.Model):
     def get_absolute_url(self):
         url = reverse('chemmanager-home') + '?q=' + self.name
         return url
-        # return reverse('chemical-detail', kwargs={'pk': self.pk})
 
 
 class Unit(models.Model):

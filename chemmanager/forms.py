@@ -6,7 +6,7 @@ class ChemicalCreateForm(forms.ModelForm):
 
     class Meta:
         model = Chemical
-        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment')
+        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment', 'image')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
@@ -21,7 +21,8 @@ class ChemicalCreateForm(forms.ModelForm):
             'density': html_script + 'Density in \(\mathrm{g} \cdot \mathrm{cm}^{-3}\)',
             'melting_point': 'Melting Point in °C',
             'boiling_point': 'Boiling Point in °C',
-            'molar_mass': html_script + 'Molar Mass in \(\mathrm{g}\cdot\mathrm{mol}^{-1}\)'
+            'molar_mass': html_script + 'Molar Mass in \(\mathrm{g}\cdot\mathrm{mol}^{-1}\)',
+            'image': 'Image (leave empty for default pubchem img search)',
         }
 
 
