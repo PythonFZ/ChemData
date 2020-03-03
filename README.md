@@ -14,7 +14,3 @@ Install
 - pip install django-user-agents
 - python manage.py runserver
 (python manage.py runserver 0.0.0.0:80 to run on localhost/ + edit settings.py for mobile testing)
-
-Add Stuff
-- http://127.0.0.1:8000/chemmanager/chemical/new/
-- http://127.0.0.1:8000/post/new/
