@@ -12,7 +12,7 @@
             <!--end of col-->
             <div class="col-auto">&nbsp;</div>
             <div class="col-auto">
-                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals">Search</button>
+                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals" onclick="localStorage.clear()">Search</button>
             </div>
             <!--end of col-->
         </div>
@@ -49,6 +49,7 @@
                                 value="{{ chemical.id }}">Add Stock
                         </button>
                         <a class="btn btn-warning btn-sm" href="{% url 'chemical-update' chemical.id %}">Edit</a>
+                        <a href="{% url 'chemical-list' chemical.id %}" class="btn btn-sm btn-info">Detail</a>
                         {% if request.user_agent.is_mobile %}
                             </div>
                         {% endif %}
