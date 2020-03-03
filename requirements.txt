@@ -1,0 +1,7 @@
+django
+Pillow
+django-crispy-forms
+pyyaml
+ua-parser
+user-agents
+django-user-agents
