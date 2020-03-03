@@ -158,6 +158,19 @@
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
+            $('.collapse').each(function () {
+                // Default close unless saved as open
+                if (localStorage.getItem('open_' + this.id) === 'open') {
+                    $(this).collapse('show');
+                }
+            });
+        });
+    </script>
+    <script>
+        $('.collapse').on('show.bs.collapse', function () {
+            localStorage.setItem('open_' + this.id, 'open')
+        }).on('hide.bs.collapse', function () {
+            localStorage.removeItem('open_' + this.id)
         });
     </script>
 {% endblock %}
