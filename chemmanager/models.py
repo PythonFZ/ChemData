@@ -1,8 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.utils import timezone
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from users.models import Workgroup
 
 
 class Chemical(models.Model):
@@ -19,7 +19,7 @@ class Chemical(models.Model):
     cas = models.CharField(max_length=100, blank=True, null=True)
 
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    group = models.ManyToManyField(Group)
+    workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -43,7 +43,7 @@ class Unit(models.Model):
 class Storage(models.Model):
     name = models.CharField(max_length=250)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    group = models.ManyToManyField(Group)
+    workgroup = models.ManyToManyField(Workgroup)
 
     def __str__(self):
         return self.name

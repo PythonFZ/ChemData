@@ -25,8 +25,8 @@
                    data-target="#collapseAll-{{ chemical.id }}"
                    aria-controls="collapseAll-{{ chemical.id }}">
                     <div class="d-flex w-100 bd-highlight">
-                        {% if request.user.groups.first == chemical.creator.groups.first %}
-                        <h4>{{ chemical.name }}</h4>
+                        {% if request.user.profile.workgroup == chemical.workgroup %}
+                            <h4>{{ chemical.name }}</h4>
                         {% else %}
                             <h4>{{ chemical.name }} ({{ chemical.creator.groups.first }})</h4>
                         {% endif %}
@@ -81,34 +81,36 @@
                                 <th>Name</th>
                                 <th>Quantity</th>
                                 {% if request.user_agent.is_pc %}
-                                    <th>Comment</th>
+                                    <th>Location</th>
                                     <th>Last used</th>
                                 {% endif %}
                             </tr>
                             </thead>
 
                             {% for stock in chemical.stock_set.all %}
-                                <tr>
-                                    <th>
-                                        <a href="{% url 'stock-update' stock.id %}"
-                                           class="btn btn-sm btn-outline-primary w-100">{{ stock.name }}</a>
-                                    </th>
-                                    <th>
-                                        <a href="{% url 'extraction-create' stock.id %}"
-                                           class="btn btn-outline-info btn-sm w-100"
-                                           data-toggle="tooltip" data-html="true"
-                                           title="Last Used {{ stock.extraction_set.last.date_created|date:"D d. F Y" }}"
-                                        >{{ stock.left_quantity }} {{ stock.unit }}</a>
-                                    </th>
-                                    {% if request.user_agent.is_pc %}
-                                        {% if stock.comment %}
-                                            <th>{{ stock.comment }}</th>
-                                        {% else %}
-                                            <th>-</th>
+                                {% if request.user.profile.workgroup in stock.storage.workgroup.all or chemical.workgroup == request.user.profile.workgroup %}
+                                    <tr>
+                                        <th>
+                                            <a href="{% url 'stock-update' stock.id %}"
+                                               class="btn btn-sm btn-outline-primary w-100">{{ stock.name }}</a>
+                                        </th>
+                                        <th>
+                                            <a href="{% url 'extraction-create' stock.id %}"
+                                               class="btn btn-outline-info btn-sm w-100"
+                                               data-toggle="tooltip" data-html="true"
+                                               title="Last Used {{ stock.extraction_set.last.date_created|date:"D d. F Y" }}"
+                                            >{{ stock.left_quantity }} {{ stock.unit }}</a>
+                                        </th>
+                                        {% if request.user_agent.is_pc %}
+                                            {% if stock.storage %}
+                                                <th>{{ stock.storage }}</th>
+                                            {% else %}
+                                                <th>-</th>
+                                            {% endif %}
+                                            <th>{{ stock.extraction_set.last.date_created|date:"d.m.Y" }}</th>
                                         {% endif %}
-                                        <th>{{ stock.extraction_set.last.date_created|date:"d.m.Y" }}</th>
-                                    {% endif %}
-                                </tr>
+                                    </tr>
+                                {% endif %}
                             {% endfor %}
                         </table>
                     </div>

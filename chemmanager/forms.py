@@ -6,7 +6,7 @@ class ChemicalCreateForm(forms.ModelForm):
 
     class Meta:
         model = Chemical
-        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment', 'group')
+        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
@@ -32,7 +32,7 @@ class StockUpdateForm(forms.ModelForm):
         request = kwargs.pop('request')
         super(StockUpdateForm, self).__init__(*args, **kwargs)
         print(request.user.groups.all())
-        self.fields['storage'].queryset = Storage.objects.filter(group__in=request.user.groups.all())
+        self.fields['storage'].queryset = Storage.objects.filter(workgroup=request.user.profile.workgroup).distinct()
 
     class Meta:
         model = Stock

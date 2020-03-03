@@ -8,19 +8,13 @@ from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
 # from django_user_agents.utils import get_user_agent
 
 
-class StockCreateView(CreateView):
+class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Stock
     # fields = ('name', 'quantity', 'unit', 'storage')
     form_class = StockUpdateForm
 
     def get_form_kwargs(self):
-        """
-        There are two possibilities to share chemicals:
-        1. Share the Chemical (Stocks can be created, Extractions can be created, Chemical can not be edited)
-        2. Share the Storage (Storage-Place is shared)
-        # TODO Shared Storage-Chemicals should automatically fulfill shared chemicals!
-        # TODO At this moment it is not favourable to share storage. Better Share chemicals!
-        """
+        """Pass Request for filtering storage drop-down"""
         kwargs = super(StockCreateView, self).get_form_kwargs()
         kwargs.update({
             'request': self.request,
@@ -39,6 +33,21 @@ class StockCreateView(CreateView):
 
         return context
 
+    def test_func(self):
+        """Only Workgroup-Members are allowed to edit, Shared Groups are only permitted to create extractions!
+        Otherwise Members of different Groups could change storage, which is not allowed"""
+        chemical_id = self.request.GET.get('chemical')
+        if Chemical.objects.filter(id=self.request.GET.get('chemical'),
+                                   workgroup=self.request.user.profile.workgroup).count() > 0:
+            return True
+        else:
+            return False
+
+    def handle_no_permission(self):
+        messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                             'Please contact your group admin.')
+        return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
+
 
 class ChemicalListView(ListView):
     model = Chemical
@@ -46,25 +55,15 @@ class ChemicalListView(ListView):
     context_object_name = 'chemicals'
     extra_context = {'title': 'Chemical Manager'}
 
-    # def get_context_data(self, **kwargs):
-    #     for chemical in self.model.objects.all():
-    #         for stock in chemical.stock_set.all():
-    #             quantity = 0
-    #             for extraction in stock.extraction_set.all():
-    #                 quantity += extraction.quantity
-    #             kwargs.update({
-    #                 f'stock_left_{stock.id}': quantity
-    #             })
-    #     return super(ChemicalListView, self).get_context_data(**kwargs)
-
     def get_queryset(self):
         query = self.request.GET.get('q')
         if query:
-            object_list = self.model.objects.filter(name__icontains=query, group__in=self.request.user.groups.all())
+            object_list = self.model.objects.filter(name__icontains=query)
         else:
-            object_list = self.model.objects.filter(group__in=self.request.user.groups.all())
+            object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup) | \
+                          Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup)
 
-        return object_list.order_by('name')
+        return object_list.order_by('name').distinct()
 
     paginate_by = 10
 
@@ -78,26 +77,13 @@ class ChemicalCreateView(CreateView):
     }
 
     def form_valid(self, form):
-        # TODO add all fields!
-        instance = Chemical.objects.create(creator=self.request.user,
-                                           name=form.cleaned_data.get('name'),
-                                           structure=form.cleaned_data.get('structure'),
-                                           molar_mass=form.cleaned_data.get('molar_mass'),
-                                           density=form.cleaned_data.get('density'),
-                                           melting_point=form.cleaned_data.get('melting_point'),
-                                           boiling_point=form.cleaned_data.get('boiling_point'),
-                                           comment=form.cleaned_data.get('comment')
-                                           )
-        instance.group.set(self.request.user.groups.all())
-        url = reverse('chemmanager-home') + '?q=' + instance.name
-        return HttpResponseRedirect(url)
-
-        # return super().form_valid(form)
+        form.instance.creator = self.request.user
+        form.instance.workgroup = self.request.user.profile.workgroup
+        return super().form_valid(form)
 
     def get_form(self, form_class=None):
         """Get unit from the associated stock"""
         form = super().get_form(form_class)
-        form['group'].initial = self.request.user.groups.all()
         return form
 
 
@@ -168,8 +154,7 @@ class StockDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         """Check if User is in group and allowed to remove Stock"""
         stock = self.get_object()
-        chemical = Chemical.objects.filter(stock=stock)
-        if chemical.filter(group__in=self.request.user.groups.all()).count() > 0:
+        if self.request.user.profile.workgroup in stock.storage.workgroup.all():
             return True
         else:
             return False
@@ -180,7 +165,7 @@ class StockDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
 
-class StockUpdateView(UpdateView):
+class StockUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Stock
     form_class = StockUpdateForm
 
@@ -190,6 +175,20 @@ class StockUpdateView(UpdateView):
             'request': self.request,
         })
         return kwargs
+
+    def test_func(self):
+        """Only Workgroup-Members are allowed to edit, Shared Groups are only permited to create extractions!
+        Otherwise Members of different Groups could change storage, which is not allowed"""
+        stock = self.get_object()
+        if self.request.user.profile.workgroup == stock.chemical.workgroup:
+            return True
+        else:
+            return False
+
+    def handle_no_permission(self):
+        messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                             'Please contact your group admin.')
+        return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
 
 class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -231,10 +230,13 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return super().form_valid(form)
 
     def test_func(self):
-        """Check if User is in group and allowed to remove Stock"""
-        chemical = Chemical.objects.filter(stock=Stock.objects.get(id=self.kwargs['pk']))
-        if chemical.filter(group__in=self.request.user.groups.all()).count() > 0:
+        """Check if User is in group and allowed to add Extraction
+        Allow if stock_storage_workgroup is in workgroup of the user or if stock has no workgroup"""
+        my_stock = Stock.objects.filter(id=self.kwargs['pk'])
+        if my_stock.filter(storage__workgroup=self.request.user.profile.workgroup).count() > 0 or\
+                Chemical.objects.filter(workgroup=self.request.user.profile.workgroup, stock=my_stock.first()).count() > 0:
             return True
+
         else:
             return False
 
