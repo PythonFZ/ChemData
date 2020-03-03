@@ -11,7 +11,6 @@ class ChemicalCreateForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
             'comment': forms.Textarea(attrs={'rows': 4}),
-            'group': forms.SelectMultiple(),
         }
 
         html_script = '<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' + \

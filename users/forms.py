@@ -24,3 +24,14 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['image']
+
+
+class ProfileCreateForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProfileCreateForm, self).__init__(*args, **kwargs)
+        self.fields['workgroup'].required = True
+
+    class Meta:
+        model = Profile
+        fields = ['workgroup']

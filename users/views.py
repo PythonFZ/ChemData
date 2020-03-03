@@ -1,20 +1,32 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterFrom, ProfileUpdateForm, UserUpdateForm
+from .forms import UserRegisterFrom, ProfileUpdateForm, UserUpdateForm, ProfileCreateForm
+from .models import Profile, Workgroup
 
 
 def register(request):
+    """Force Selection of Workgroup and update when created successfully"""
     if request.method == 'POST':
-        form = UserRegisterFrom(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
+        u_form = UserRegisterFrom(request.POST)
+        p_form = ProfileCreateForm(request.POST)
+        if u_form.is_valid() and p_form.is_valid():
+            username = u_form.cleaned_data.get('username')
+            u_form.save()
+            workgroup = Workgroup.objects.filter(name=p_form.cleaned_data.get('workgroup')).first()
+            Profile.objects.filter(user__username=username).update(workgroup=workgroup)
+
             messages.success(request, f'Account for {username} successfully created. Please log in.')
             return redirect('login')
     else:
-        form = UserRegisterFrom()
-    return render(request, 'users/register.html', {'form': form})
+        u_form = UserRegisterFrom()
+        p_form = ProfileCreateForm()
+
+    context = {
+        'u_form': u_form,
+        'p_form': p_form,
+    }
+    return render(request, 'users/register.html', context)
 
 
 @login_required

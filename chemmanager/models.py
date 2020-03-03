@@ -46,7 +46,10 @@ class Storage(models.Model):
     workgroup = models.ManyToManyField(Workgroup)
 
     def __str__(self):
-        return self.name
+        if self.workgroup.count() > 1:
+            return f'{self.name} (shared)'
+        else:
+            return self.name
 
 
 class Stock(models.Model):
