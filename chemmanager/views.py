@@ -6,8 +6,6 @@ from django.contrib import messages
 from .models import Chemical, Stock, Extraction
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
 from .utils import PubChemLoader
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Button
 
 
 class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -98,8 +96,8 @@ class ChemicalCreateView(CreateView):
                 return self.render_to_response(context)
         else:
             # Check if CID has been generated, that means always, that an Image should be available!
-            if (form.data.get('image') == '') and (form.data.get('cid') is not None):
-                form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
+            # if (form.data.get('image') == '') and (form.data.get('cid') is not None):
+            #     form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
             form.instance.creator = self.request.user
             form.instance.workgroup = self.request.user.profile.workgroup
             return super().form_valid(form)
@@ -144,8 +142,8 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     return self.render_to_response(context)
             else:
                 # Check if CID has been generated, that means always, that an Image should be available!
-                if (form.data.get('image') == '') and (form.data.get('cid') is not None):
-                    form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
+                # if (form.data.get('image') == '') and (form.data.get('cid') is not None):
+                #     form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
                 return super().form_valid(form)
         else:
             messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '

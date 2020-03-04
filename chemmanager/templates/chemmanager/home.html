@@ -153,11 +153,15 @@
             <h5>{{ chemical_detail.name }}</h5>
             <div class="article-content">This can display some comment or img or whatever about the selected chemical!
             </div>
-            {% if chemical_detail.image %}
+            {% if chemical_detail.cid and not chemical_detail.image%}
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ chemical_detail.cid }}&width=250&height=250" alt="test">
+            {% elif chemical_detail.image%}
                 <img src="{{ chemical_detail.image.url }}" alt="not found">
             {% endif %}
         </div>
     {% endif %}
+
+
 {% endblock properties %}
 
 
