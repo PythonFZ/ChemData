@@ -13,7 +13,22 @@ class PubChemLoader:
             self.compound = None
 
     def load_img(self):
-        img_path = f'/chemical_pics/{self.chemical.id}.png'
+        img_path = f'/chemical_pics/{self.compound.cid}.png'
         if not os.path.isfile('./media' + img_path):
             pcp.download('PNG', './media' + img_path, self.compound.cid, 'cid')
         return img_path
+
+    def generate_initial(self, initial_dict):
+        # initial_dict['name'] = self.compound.iupac_name
+        initial_dict['img_creat'] = 'something'
+        if initial_dict['structure'] is None:
+            initial_dict['structure'] = self.compound.molecular_formula
+        if initial_dict.get('molar_mass') is None:
+            initial_dict['molar_mass'] = self.compound.molecular_weight
+        if initial_dict['cid'] is None:
+            self.load_img()
+            initial_dict['cid'] = self.compound.cid
+
+
+        return initial_dict
+

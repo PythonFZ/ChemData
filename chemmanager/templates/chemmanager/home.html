@@ -12,7 +12,9 @@
             <!--end of col-->
             <div class="col-auto">&nbsp;</div>
             <div class="col-auto">
-                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals" onclick="localStorage.clear()">Search</button>
+                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals"
+                        onclick="localStorage.clear()">Search
+                </button>
             </div>
             <!--end of col-->
         </div>
@@ -21,7 +23,8 @@
     {% for chemical in chemicals %}
         <article class="media content-section mb-1">
             <div class="media-body">
-                <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}" class="expand-chemical" id="{{ chemical.id }}">
+                <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}" class="expand-chemical"
+                   id="{{ chemical.id }}">
                     <div class="d-flex w-100 bd-highlight">
                         {% if request.user.profile.workgroup == chemical.workgroup %}
                             <h4>{{ chemical.name }}</h4>
@@ -148,12 +151,13 @@
     {% if chemical_detail %}
         <div class="content-section">
             <h5>{{ chemical_detail.name }}</h5>
-            <div class="article-content">This can display some comment or img or whatever about the selected chemical!</div>
-            <img src="{{ chemical_detail.image.url }}" alt="not found">
+            <div class="article-content">This can display some comment or img or whatever about the selected chemical!
+            </div>
+            {% if chemical_detail.image %}
+                <img src="{{ chemical_detail.image.url }}" alt="not found">
+            {% endif %}
         </div>
     {% endif %}
-
-
 {% endblock properties %}
 
 
@@ -164,7 +168,6 @@
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
-
             $('.collapse').each(function () {
                 // Default close unless saved as open
                 if (localStorage.getItem('open_' + this.id) === 'open') {
@@ -175,10 +178,9 @@
     </script>
     <script>
         $('.expand-chemical').click(function () {
-            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) === 'open'){
+            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) === 'open') {
                 localStorage.removeItem('open_' + 'collapseAll-' + this.id)
-            }
-            else {
+            } else {
                 localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open')
             }
         });

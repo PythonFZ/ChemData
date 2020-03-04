@@ -85,34 +85,21 @@ class ChemicalCreateView(CreateView):
     def form_valid(self, form, **kwargs):
         """Load Data from PubChem if button is pressed"""
         # TODO add Image download
-        # TODO add all other dicts like density, melting point, etc.. add else!
         if 'check_pubchem' in self.request.POST:
+            context = self.get_context_data(**kwargs)
             pubchemloader = PubChemLoader(chemical_name=form.cleaned_data.get('name'))
             if pubchemloader.compound is not None:
-
-                inital_dict = {'name': form.cleaned_data.get('name')}
-                inital_dict['name'] = pubchemloader.compound.iupac_name
-                if form.cleaned_data.get('structure') is None:
-                    inital_dict['structure'] = pubchemloader.compound.molecular_formula
-                else:
-                    inital_dict['structure'] = form.cleaned_data.get('structure')
-                if form.cleaned_data.get('molar_mass') is None:
-                    inital_dict['molar_mass'] = pubchemloader.compound.molecular_weight
-                else:
-                    inital_dict['molar_mass'] = form.cleaned_data.get('molar_mass')
-                # if form.cleaned_data.get('image') is None:
-                #     inital_dict['image'] = pubchemloader.load_img()
-
-                context = self.get_context_data(**kwargs)
-                context['form'] = ChemicalCreateForm(initial=inital_dict)
+                initial_dict = pubchemloader.generate_initial(initial_dict=form.cleaned_data)
+                context['form'] = ChemicalCreateForm(initial=initial_dict)
                 return self.render_to_response(context)
             else:
-                form.instance.creator = self.request.user
-                form.instance.workgroup = self.request.user.profile.workgroup
                 messages.add_message(self.request, messages.WARNING,
                                      f'Could not find Substance on PubChem!')
-                return super().form_valid(form)
+                return self.render_to_response(context)
         else:
+            # Check if CID has been generated, that means always, that an Image should be available!
+            if (form.data.get('image') == '') and (form.data.get('cid') is not None):
+                form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
             form.instance.creator = self.request.user
             form.instance.workgroup = self.request.user.profile.workgroup
             return super().form_valid(form)
@@ -139,12 +126,27 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         return super(ChemicalUpdateView, self).dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
+    def form_valid(self, form, **kwargs):
         form.instance.creator = self.request.user
         chemical = self.get_object()
 
         if self.request.user == chemical.creator:
-            return super().form_valid(form)
+            if 'check_pubchem' in self.request.POST:
+                context = self.get_context_data(**kwargs)
+                pubchemloader = PubChemLoader(chemical_name=form.cleaned_data.get('name'))
+                if pubchemloader.compound is not None:
+                    initial_dict = pubchemloader.generate_initial(initial_dict=form.cleaned_data)
+                    context['form'] = ChemicalCreateForm(initial=initial_dict)
+                    return self.render_to_response(context)
+                else:
+                    messages.add_message(self.request, messages.WARNING,
+                                         f'Could not find Substance on PubChem!')
+                    return self.render_to_response(context)
+            else:
+                # Check if CID has been generated, that means always, that an Image should be available!
+                if (form.data.get('image') == '') and (form.data.get('cid') is not None):
+                    form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
+                return super().form_valid(form)
         else:
             messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
                                                                  'Please contact your group admin.')

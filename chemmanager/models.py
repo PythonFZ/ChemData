@@ -17,7 +17,7 @@ class Chemical(models.Model):
     comment = models.TextField(blank=True)
     cid = models.CharField(max_length=100, blank=True, null=True)
     cas = models.CharField(max_length=100, blank=True, null=True)
-    image = models.ImageField(default='chemical_pics/default.png', upload_to='chemical_pics')
+    image = models.ImageField(upload_to='chemical_pics', blank=True, null=True)
 
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, blank=True, null=True)
