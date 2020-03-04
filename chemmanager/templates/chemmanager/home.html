@@ -182,11 +182,8 @@
     </script>
     <script>
         $('.expand-chemical').click(function () {
-            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) === 'open') {
-                localStorage.removeItem('open_' + 'collapseAll-' + this.id)
-            } else {
-                localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open')
-            }
+            localStorage.clear();
+            localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
         });
     </script>
 {% endblock %}
