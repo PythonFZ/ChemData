@@ -12,5 +12,6 @@ Install
 - pip install django-crispy-forms
 - pip install pyyaml ua-parser user-agents
 - pip install django-user-agents
+- pip install pubchempy
 - python manage.py runserver
 (python manage.py runserver 0.0.0.0:80 to run on localhost/ + edit settings.py for mobile testing)
