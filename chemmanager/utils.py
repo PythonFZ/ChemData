@@ -21,9 +21,11 @@ class PubChemLoader:
     def generate_initial(self, initial_dict):
         # initial_dict['name'] = self.compound.iupac_name
         initial_dict['img_creat'] = 'something'
-        if initial_dict['structure'] is None:
+        #if initial_dict['structure'] is None:
+        if initial_dict['structure'] != self.compound.molecular_formula:
             initial_dict['structure'] = self.compound.molecular_formula
-        if initial_dict.get('molar_mass') is None:
+        #if initial_dict.get('molar_mass') is None:
+        if initial_dict.get('molar_mass') != self.compound.molecular_weight:
             initial_dict['molar_mass'] = self.compound.molecular_weight
         if initial_dict['cid'] is None:
             # self.load_img()

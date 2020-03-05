@@ -8,7 +8,7 @@ from .models import Post
 #     context = {
 #         'posts': Post.objects.all()
 #     }
-#     return render(request, 'blog/home.html', context)
+#     return render(request, 'blog/blog_home.html', context)
 
 
 class PostListView(ListView):
@@ -34,4 +34,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 def about(request):
     return render(request, 'blog/about.html', {'title': 'About'})
+
+def blog(request):
+    return render(request, 'blog/blog_home.html')
 

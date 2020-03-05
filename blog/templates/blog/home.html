@@ -1,16 +1,16 @@
 {% extends "blog/blog_base.html" %}
+
 {% block content %}
-    {% for post in posts %}
-        <article class="media content-section">
-            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}" alt="">
-            <div class="media-body">
-                <div class="article-metadata">
-                    <a class="mr-2" href="#">{{ post.author }}</a>
-                    <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
-                </div>
-                <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
-                <p class="article-content">{{ post.content }}</p>
+    <div class="container">
+        <div class="jumbotron">
+            <h1>ChemData</h1>
+            <p>Welcome to ChemData!</p>
+         </div>
+        <div class="container">
+            To the <a href="{% url 'chemmanager-home' %}" class="btn btn-link">Chem Manager</a>
+            or <a href="{% url 'blog-home' %}" class="btn btn-link">Blog</a>
             </div>
-        </article>
-    {% endfor %}
+    </div>
+
+
 {% endblock content %}
