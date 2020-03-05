@@ -1,5 +1,4 @@
 import pubchempy as pcp
-from .models import Chemical
 import os.path
 
 

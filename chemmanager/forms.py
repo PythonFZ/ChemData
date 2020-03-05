@@ -1,6 +1,5 @@
 from django import forms
 from .models import Chemical, Stock, Extraction, Storage
-from treebeard.forms import MoveNodeForm
 
 
 class ChemicalCreateForm(forms.ModelForm):
@@ -30,7 +29,6 @@ class ChemicalCreateForm(forms.ModelForm):
 
 
 class StockUpdateForm(forms.ModelForm):
-    # storage = forms.ModelChoiceField()
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
@@ -54,14 +52,3 @@ class ExtractionCreateForm(forms.ModelForm):
             'anonymous': forms.CheckboxInput(),
             'comment': forms.Textarea(attrs={'rows': 4})
         }
-
-# name = models.CharField(max_length=250)
-#     structure = models.CharField(max_length=250, blank=True)
-#     molar_mass = models.FloatField(blank=True, null=True)
-#     density = models.FloatField(blank=True, null=True)
-#     melting_point = models.FloatField(blank=True, null=True)
-#     boiling_point = models.FloatField(blank=True, null=True)
-#
-#     comment = models.TextField(blank=True)
-#     cid = models.CharField(max_length=100, blank=True, null=True)
-#     cas = models.CharField(max_length=100, blank=True, null=True)

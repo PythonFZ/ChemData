@@ -10,7 +10,6 @@ from .views import (
     StockDeleteView,
 )
 from django.contrib.auth.decorators import login_required
-from . import views
 
 urlpatterns = [
     path('', login_required(ChemicalListView.as_view()), name='chemmanager-home'),

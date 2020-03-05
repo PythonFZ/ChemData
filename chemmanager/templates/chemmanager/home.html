@@ -2,8 +2,8 @@
 {#{% load crispy_forms_tags %}#}
 
 {% block content %}
-    <form class="card card-sm mb-2">
-        <div class="card-body row no-gutters align-items-center">
+    <form class="media mb-2">
+        <div class="media-body row no-gutters align-items-center">
             <!--end of col-->
             <div class="col">
                 <input class="form-control form-control-lg form-control-borderless" type="text"
@@ -23,98 +23,69 @@
     {% for chemical in chemicals %}
         <article class="media content-section mb-1">
             <div class="media-body">
-                <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}" class="expand-chemical"
-                   id="{{ chemical.id }}">
-                    <div class="d-flex w-100 bd-highlight">
-                        {% if request.user.profile.workgroup == chemical.workgroup %}
-                            <h4>{{ chemical.name }}</h4>
-                        {% else %}
-                            <h4>{{ chemical.name }} ({{ chemical.workgroup }})</h4>
-                        {% endif %}
+                <div class="d-flex justify-content-between">
+                    <div class="p-2">
+                        <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}"
+                           class="expand-chemical w-100" id="{{ chemical.id }}">
+                            {% if request.user.profile.workgroup == chemical.workgroup %}
+                                <h4>{{ chemical.name }}</h4>
+                            {% else %}
+                                <h4>{{ chemical.name }} ({{ chemical.workgroup }})</h4>
+                            {% endif %}
+                        </a>
                     </div>
-                </a>
-                <div class="collapse" id="collapseAll-{{ chemical.id }}">
-                    <form class="mb-1" action="{% url 'stock-create' chemical.id %}">
-                        {% if request.user_agent.is_mobile %}
-                            <div class="d-flex justify-content-between w-100">
-                        {% endif %}
-                        <button class="btn btn-info btn-sm" type="button" data-toggle="collapse"
-                                data-target="#collapseStock-{{ chemical.id }}" aria-expanded="true"
-                                aria-controls="collapseStock-{{ chemical.id }}">Stock
-                        </button>
-                        <button class="btn btn-info btn-sm" type="button" data-toggle="collapse"
-                                data-target="#collapseProperties-{{ chemical.id }}" aria-expanded="false"
-                                aria-controls="collapseProperties-{{ chemical.id }}">Properties
-                        </button>
-                        <button class="btn btn-warning btn-sm" name="chemical" type="submit"
-                                value="{{ chemical.id }}">Add Stock
-                        </button>
-                        <a class="btn btn-warning btn-sm" href="{% url 'chemical-update' chemical.id %}">Edit</a>
-                        {% if request.user_agent.is_mobile %}
+                    <div>
+                        <form class="mb-1" action="{% url 'stock-create' chemical.id %}">
+                            <div class="btn-group-sm">
+                                <button class="btn btn-info" name="chemical" type="submit" value="{{ chemical.id }}"><i
+                                        class="fa fa-plus-circle"></i> Add
+                                </button>
+                                <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info"><i
+                                        class="fa fa-edit"></i> Edit</a>
                             </div>
-                        {% endif %}
-                    </form>
-
-                    <div class="collapse" id="collapseProperties-{{ chemical.id }}">
-                        <dl class="row">
-                            {% if chemical.molar_mass %}
-                                <dt class="col-sm-3">Molare Mass</dt>
-                                <dd class="col-sm-9"> {{ chemical.molar_mass }} g/mol</dd>
-                            {% endif %}
-                            {% if chemical.melting_point %}
-                                <dt class="col-sm-3">Melting Point</dt>
-                                <dd class="col-sm-9">{{ chemical.melting_point }} °C</dd>
-                            {% endif %}
-                            {% if chemical.boiling_point %}
-                                <dt class="col-sm-3">Boiling Point</dt>
-                                <dd class="col-sm-9">{{ chemical.boiling_point }} °C</dd>
-                            {% endif %}
-                            {% if chemical.density %}
-                                <dt class="col-sm-3">Density</dt>
-                                <dd class="col-sm-9">{{ chemical.density }} g/L</dd>
-                            {% endif %}
-                        </dl>
+                        </form>
                     </div>
-                    <div class="collapse show" id="collapseStock-{{ chemical.id }}">
-                        <table class="table">
-                            <thead class="thead-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Quantity</th>
-                                {% if request.user_agent.is_pc %}
-                                    <th>Location</th>
-                                    <th>Last used</th>
-                                {% endif %}
-                            </tr>
-                            </thead>
+                </div>
+                <div class="collapse" id="collapseAll-{{ chemical.id }}">
 
-                            {% for stock in chemical.stock_set.all %}
-                                {% if request.user.profile.workgroup in stock.storage.workgroup.all or chemical.workgroup == request.user.profile.workgroup %}
-                                    <tr>
-                                        <th>
-                                            <a href="{% url 'stock-update' stock.id %}"
-                                               class="btn btn-sm btn-outline-primary w-100">{{ stock.name }}</a>
-                                        </th>
-                                        <th>
-                                            <a href="{% url 'extraction-create' stock.id %}"
-                                               class="btn btn-outline-info btn-sm w-100"
-                                               data-toggle="tooltip" data-html="true"
-                                               title="Last Used {{ stock.extraction_set.last.date_created|date:"D d. F Y" }}"
-                                            >{{ stock.left_quantity }} {{ stock.unit }}</a>
-                                        </th>
-                                        {% if request.user_agent.is_pc %}
-                                            {% if stock.storage %}
-                                                <th>{{ stock.storage.location_name }}</th>
-                                            {% else %}
-                                                <th>-</th>
-                                            {% endif %}
-                                            <th>{{ stock.extraction_set.last.date_created|date:"d.m.Y" }}</th>
+                    <table class="table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                            {% if request.user_agent.is_pc %}
+                                <th>Location</th>
+                                <th>Last used</th>
+                            {% endif %}
+                        </tr>
+                        </thead>
+
+                        {% for stock in chemical.stock_set.all %}
+                            {% if request.user.profile.workgroup in stock.storage.workgroup.all or chemical.workgroup == request.user.profile.workgroup %}
+                                <tr>
+                                    <th>
+                                        <a href="{% url 'stock-update' stock.id %}"
+                                           class="btn btn-sm btn-outline-primary w-100">{{ stock.name }}</a>
+                                    </th>
+                                    <th>
+                                        <a href="{% url 'extraction-create' stock.id %}"
+                                           class="btn btn-outline-info btn-sm w-100"
+                                           data-toggle="tooltip" data-html="true"
+                                           title="Last Used {{ stock.extraction_set.last.date_created|date:"D d. F Y" }}"
+                                        >{{ stock.left_quantity }} {{ stock.unit }}</a>
+                                    </th>
+                                    {% if request.user_agent.is_pc %}
+                                        {% if stock.storage %}
+                                            <th>{{ stock.storage.location_name }}</th>
+                                        {% else %}
+                                            <th>-</th>
                                         {% endif %}
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </table>
-                    </div>
+                                        <th>{{ stock.extraction_set.last.date_created|date:"d.m.Y" }}</th>
+                                    {% endif %}
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
         </article>
@@ -151,11 +122,29 @@
     {% if chemical_detail %}
         <div class="content-section">
             <h5>{{ chemical_detail.name }}</h5>
-            <div class="article-content">This can display some comment or img or whatever about the selected chemical!
-            </div>
-            {% if chemical_detail.cid and not chemical_detail.image%}
-                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ chemical_detail.cid }}&width=250&height=250" alt="test">
-            {% elif chemical_detail.image%}
+            <dl class="row">
+                {% if chemical_detail.molar_mass %}
+                    <dt class="col-sm-5">Molare Mass</dt>
+                    <dd class="col-sm-5"> {{ chemical_detail.molar_mass }} g/mol</dd>
+                {% endif %}
+                {% if chemical_detail.melting_point %}
+                    <dt class="col-sm-5">Melting Point</dt>
+                    <dd class="col-sm-5">{{ chemical_detail.melting_point }} °C</dd>
+                {% endif %}
+                {% if chemical_detail.boiling_point %}
+                    <dt class="col-sm-5">Boiling Point</dt>
+                    <dd class="col-sm-5">{{ chemical_detail.boiling_point }} °C</dd>
+                {% endif %}
+                {% if chemical_detail.density %}
+                    <dt class="col-sm-5">Density</dt>
+                    <dd class="col-sm-5">{{ chemical_detail.density }} g/L</dd>
+                {% endif %}
+            </dl>
+
+            {% if chemical_detail.cid and not chemical_detail.image %}
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ chemical_detail.cid }}&width=250&height=250"
+                     alt="test">
+            {% elif chemical_detail.image %}
                 <img src="{{ chemical_detail.image.url }}" alt="not found">
             {% endif %}
         </div>
@@ -163,10 +152,6 @@
 
 
 {% endblock properties %}
-
-
-
-
 
 {% block custom_js %}
     <script>
@@ -186,4 +171,13 @@
             localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
         });
     </script>
+{% endblock %}
+
+{% block custom_head %}
+    <script src="https://kit.fontawesome.com/6d7a14736a.js" crossorigin="anonymous"></script>
+    <style>
+        .btn-group-lg .btn, .btn-group-sm .btn {
+            border-radius: 2px;
+        }
+    </style>
 {% endblock %}

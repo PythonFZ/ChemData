@@ -55,6 +55,7 @@ class Storage(MP_Node):
         return f'Place: {self.name}'
 
     def location_name(self):
+        '''Display Name like Place A (Subplace B, detailed Place C) in ListView'''
         if self.get_depth() > 1:
             name_str = self.get_root().name + ' ('
             for parent in self.get_ancestors()[1:]:
