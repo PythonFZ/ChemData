@@ -104,7 +104,7 @@
                                         </th>
                                         {% if request.user_agent.is_pc %}
                                             {% if stock.storage %}
-                                                <th>{{ stock.storage }}</th>
+                                                <th>{{ stock.storage.location_name }}</th>
                                             {% else %}
                                                 <th>-</th>
                                             {% endif %}

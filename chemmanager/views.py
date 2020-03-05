@@ -61,8 +61,8 @@ class ChemicalListView(ListView):
         if 'pk' in self.kwargs:
             self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
 
-        object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup) | \
-                      Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup)
+        object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
+        object_list = object_list | Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
 
         query = self.request.GET.get('q')
         if query:
@@ -276,11 +276,14 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def test_func(self):
         """Check if User is in group and allowed to add Extraction
-        Allow if stock_storage_workgroup is in workgroup of the user or if stock has no workgroup"""
-        my_stock = Stock.objects.filter(id=self.kwargs['pk'])
-        if my_stock.filter(storage__workgroup=self.request.user.profile.workgroup).count() > 0 or \
-                Chemical.objects.filter(workgroup=self.request.user.profile.workgroup,
-                                        stock=my_stock.first()).count() > 0:
+        Allow if stock_storage_workgroup is in workgroup of the user or if stock has no workgroup.
+        Permit if Chemical is set to secret!
+        """
+        my_stock = Stock.objects.get(pk=self.kwargs['pk'])
+        if my_stock.storage.workgroup.filter(storage__workgroup=self.request.user.profile.workgroup) or\
+                my_stock.chemical.workgroup == self.request.user.profile.workgroup:
+            if my_stock.chemical.secret and my_stock.chemical.workgroup != self.request.user.profile.workgroup:
+                return False
             return True
 
         else:

@@ -1,16 +1,18 @@
 from django import forms
 from .models import Chemical, Stock, Extraction, Storage
+from treebeard.forms import MoveNodeForm
 
 
 class ChemicalCreateForm(forms.ModelForm):
 
     class Meta:
         model = Chemical
-        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment', 'image', 'cid')
+        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point', 'comment', 'image', 'cid', 'secret')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
             'comment': forms.Textarea(attrs={'rows': 4}),
+            'secret': forms.CheckboxInput(),
             'cid': forms.HiddenInput()
         }
 
@@ -28,11 +30,11 @@ class ChemicalCreateForm(forms.ModelForm):
 
 
 class StockUpdateForm(forms.ModelForm):
+    # storage = forms.ModelChoiceField()
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
         super(StockUpdateForm, self).__init__(*args, **kwargs)
-        print(request.user.groups.all())
         self.fields['storage'].queryset = Storage.objects.filter(workgroup=request.user.profile.workgroup).distinct()
 
     class Meta:
