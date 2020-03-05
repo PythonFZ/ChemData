@@ -13,3 +13,9 @@ Install
 
 - python manage.py runserver
 (python manage.py runserver 0.0.0.0:80 to run on localhost/ + edit settings.py for mobile testing)
+
+
+Development Notes
+- 
+
+Storage is based on https://django-treebeard.readthedocs.io/en/latest/tutorial.html
