@@ -1,7 +1,7 @@
 # ChemData
 Web-based management tools for groups in chemical education and science.
 
-Login with **admin test_1234**
+Login with **testuser test_1234**
 
 Install
 -
