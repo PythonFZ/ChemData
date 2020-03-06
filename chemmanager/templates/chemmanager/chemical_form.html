@@ -10,6 +10,7 @@
                     {{ form|crispy }}
                     <button class="btn btn-outline-info" type="submit">{{ title }}!</button>
                     <button class="btn btn-outline-info" type="submit" name="check_pubchem">Check PubChem!</button>
+                    <a href="{% url 'chemmanager-home' %}" class="btn btn-outline-danger">Cancel</a>
                 {% else %}
                     <legend class="border-bottom mb-4">Create new Chemical</legend>
                     {{ form|crispy }}
