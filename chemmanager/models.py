@@ -80,7 +80,7 @@ class Storage(MP_Node):
 
     def __str__(self):
         if self.workgroup.count() > 1:
-            return f'{self.name} (shared)'
+            return mark_safe('&nbsp;&nbsp;' * (self.get_depth()-1) + self.name + ' (shared)')
         else:
             # Intended to show Tree-View like behaviour
             return mark_safe('&nbsp;&nbsp;' * (self.get_depth()-1) + self.name)

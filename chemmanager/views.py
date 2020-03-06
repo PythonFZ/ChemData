@@ -289,6 +289,7 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 class StorageListView(LoginRequiredMixin, ListView):
+    # TODO child storage has to have the same workgroup as parent!
     model = Storage
 
     def get_queryset(self):
