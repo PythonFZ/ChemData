@@ -3,8 +3,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django import forms
 from .models import Chemical, Stock, Extraction, Storage
-from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
+from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm
 from .utils import PubChemLoader
 
 
@@ -319,3 +320,64 @@ class StorageListView(LoginRequiredMixin, ListView):
     #     return object_list.order_by('name').distinct()
     #
     # paginate_by = 10
+
+
+class StorageCreateView(LoginRequiredMixin, CreateView):
+    model = Storage
+    form_class = StorageCreateForm
+    success_url = reverse_lazy('storage-list')
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        if self.kwargs['pk'] == 0:
+            set_storage = Storage.add_root(name=form.instance.name, room=form.instance.room, creator=self.request.user)
+            workgroups = form.cleaned_data.get('workgroup')
+        else:
+            root_storage = Storage.objects.get(id=self.kwargs['pk'])
+            set_storage = root_storage.add_child(name=form.instance.name, room=form.instance.room, creator=self.request.user)
+            workgroups = root_storage.workgroup.all()
+        set_storage.workgroup.add(self.request.user.profile.workgroup)
+        for group in workgroups:
+            set_storage.workgroup.add(group)
+
+        return HttpResponseRedirect(self.success_url)
+
+    def get_form(self, form_class=None):
+        """Make Workgroup selection only visible, if 1. Level Storage"""
+        # TODO do not show Workgroup or make it disabled if substorage
+        form = super().get_form(form_class)
+        if self.kwargs['pk'] != 0:
+            root_storage = Storage.objects.get(id=self.kwargs['pk'])
+            form.fields['workgroup'].initial = root_storage.workgroup.all()
+            # form.fields['workgroup'].widget = forms.HiddenInput()
+            form.fields['room'].initial = root_storage.room
+        else:
+            form['workgroup'].initial = self.request.user.profile
+
+        return form
+
+    def get_context_data(self, **kwargs):
+        if self.kwargs['pk'] != 0:
+            root_storage = Storage.objects.get(id=self.kwargs['pk'])
+            kwargs.update({
+                'root_storage': root_storage,
+            })
+        return super(StorageCreateView, self).get_context_data(**kwargs)
+
+
+class StorageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Storage
+    success_url = reverse_lazy('storage-list')
+
+    def test_func(self):
+        """Check if User is in group and allowed to remove Stock"""
+        storage = self.get_object()
+        if storage.creator == self.request.user:
+            return True
+        else:
+            return False
+
+    def handle_no_permission(self):
+        messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
+                                                             'Please contact your group admin.')
+        return HttpResponseRedirect(reverse_lazy('storage-list'))

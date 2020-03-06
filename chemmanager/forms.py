@@ -2,6 +2,16 @@ from django import forms
 from .models import Chemical, Stock, Extraction, Storage
 
 
+class StorageCreateForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(StorageCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Storage
+        fields = ('name', 'room', 'workgroup')
+
+
 class ChemicalCreateForm(forms.ModelForm):
 
     class Meta:

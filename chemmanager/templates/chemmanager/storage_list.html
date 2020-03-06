@@ -1,91 +1,68 @@
 {% extends "chemmanager/chemmanager_base.html" %}
 
 {% block content %}
-    <div class="form-group col-md-5">
-        <ul id="myUL">
-            {% for storage in object_list %}
-                {% if storage.is_root %}
-                    <li><input type="text" class="caret form-control mb-2" placeholder="{{ storage }}" readonly>
+    <div class="card">
+    <div class="card-body">
 
-                        <ul class="nested">
-                            {% for storage_child1 in storage.get_children %}
-                                {% if storage_child1.get_children_count > 0 %}
-                                    <li><input type="text" class="caret form-control mb-2"
-                                               placeholder="{{ storage_child1 }}"
-                                               readonly>
-                                        <ul class="nested">
-                                            {% for storage_child2 in storage_child1.get_children %}
-                                                <li><input type="text" class="caret form-control mb-2"
-                                                           placeholder="{{ storage_child2 }}" readonly></li>
-                                            {% endfor %}
-                                        </ul>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </li>
+    <table class="table table-responsive table-hover">
+    <thead>
+        <th style="vertical-align: middle">Expand</th>
+        <th style="vertical-align: middle">Place</th>
+        <th><a href="{% url 'storage-create' 0 %}" class="btn btn-sm btn-info">Add</a></th>
+    </thead>
+    {% for storage in object_list %}
+        {% if storage.is_root %}
+            <tbody>
+            <tr>
+                {% if storage.get_children_count > 0 %}
+                    <td class="clickable" data-toggle="collapse" data-target="#expandStorage-{{ storage.id }}" aria-expanded="false" aria-controls="expandStorage-{{ storage.id }}" style="vertical-align: middle">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </td>
+                {% else %}
+                    <td></td>
                 {% endif %}
+                <td style="vertical-align: middle">{{ storage }}</td>
+                <td>
+                    <button class="btn btn-sm btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a href="{% url 'storage-create' storage.id %}" class="dropdown-item">Add</a>
+                        <a href="{% url 'storage-delete' storage.id %}" class="dropdown-item">Remove</a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+            {% for storage_child_1 in storage.get_children %}
+                <tbody class="collapse table-secondary" id="expandStorage-{{ storage.id }}">
+                    {% if storage_child_1.get_children_count > 0 %}
+                        <td class="clickable" data-toggle="collapse" data-target="#expandStorage-{{ storage_child_1.id }}" aria-expanded="false" aria-controls="expandStorage-{{ storage_child_1.id }}" style="vertical-align: middle">
+                            &nbsp;&nbsp;<i class="fa fa-plus" aria-hidden="true"></i>
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td style="vertical-align: middle">{{ storage_child_1 }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a href="{% url 'storage-create' storage_child_1.id %}" class="dropdown-item">Add</a>
+                            <a href="{% url 'storage-delete' storage.id %}" class="dropdown-item">Remove</a>
+                        </div>
+                    </td>
+                </tbody>
+                {% for storage_child_2 in storage_child_1.get_children %}
+                    <tbody class="collapse table-info" id="expandStorage-{{ storage_child_1.id }}">
+                        <td></td>
+                        <td style="vertical-align: middle">{{ storage_child_2 }}</td>
+                        <td>
+                            <a href="{% url 'storage-delete' storage.id %}" class="btn btn-sm btn-info">Remove</a>
+                        </td>
+                    </tbody>
+                {% endfor %}
             {% endfor %}
-        </ul>
+        {% endif %}
+    {% endfor %}
+    </table>
+
     </div>
-
+    </div>
 {% endblock %}
-
-{% block custom_head %}
-    <style>
-        /* Remove default bullets */
-        ul, #myUL {
-            list-style-type: none;
-        }
-
-        /* Remove margins and padding from the parent ul */
-        #myUL {
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Style the caret/arrow */
-        .caret {
-            cursor: pointer;
-            user-select: none; /* Prevent text selection */
-        }
-
-        /* Create the caret/arrow with a unicode, and style it */
-        .caret::before {
-            content: "\25B6";
-            color: black;
-            display: none;
-            margin-right: 6px;
-        }
-
-        /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
-        .caret-down::before {
-            display: none;
-        }
-
-        /* Hide the nested list */
-        .nested {
-            display: none;
-        }
-
-        /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
-        .active {
-            display: block;
-            margin-right: -10px;
-        }
-    </style>
-{% endblock %}
-
-{% block custom_js %}
-    <script>
-        var toggler = document.getElementsByClassName("caret");
-        var i;
-
-        for (i = 0; i < toggler.length; i++) {
-            toggler[i].addEventListener("click", function () {
-                this.parentElement.querySelector(".nested").classList.toggle("active");
-                this.classList.toggle("caret-down");
-            });
-        }
-    </script>
-{% endblock custom_js %}
