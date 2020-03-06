@@ -8,6 +8,7 @@
                 <legend class="border-bottom mb-4">Add new Stock for {{ chemical }} </legend>
                 {{ form|crispy }}
                 <button class="btn btn-outline-info" type="submit">Add!</button>
+                <a href="{% url 'chemmanager-home' %}" class="btn btn-outline-danger">Cancel</a>
             </fieldset>
         </form>
     </div>
