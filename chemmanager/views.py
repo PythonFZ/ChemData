@@ -1,9 +1,9 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from .models import Chemical, Stock, Extraction
+from .models import Chemical, Stock, Extraction, Storage
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm
 from .utils import PubChemLoader
 
@@ -60,6 +60,8 @@ class ChemicalListView(ListView):
 
         if 'pk' in self.kwargs:
             self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
+        else:
+            self.extra_context['chemical_detail'] = None
 
         object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
         object_list = object_list | Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
@@ -284,3 +286,30 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
                                                              'Please contact your group admin.')
         return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
+
+
+class StorageListView(ListView):
+    model = Storage
+    # context_object_name = 'chemicals'
+    # extra_context = {
+    #     'title': 'Chemical Manager',
+    #     'chemical_detail': None,
+    # }
+    #
+    # def get_queryset(self):
+    #
+    #     if 'pk' in self.kwargs:
+    #         self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
+    #     else:
+    #         self.extra_context['chemical_detail'] = None
+    #
+    #     object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
+    #     object_list = object_list | Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
+    #
+    #     query = self.request.GET.get('q')
+    #     if query:
+    #         object_list = object_list.filter(name__icontains=query)
+    #
+    #     return object_list.order_by('name').distinct()
+    #
+    # paginate_by = 10

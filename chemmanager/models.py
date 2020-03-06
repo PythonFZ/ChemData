@@ -58,6 +58,7 @@ class Unit(models.Model):
 
 class Storage(MP_Node):
     name = models.CharField(max_length=250)
+    room = models.CharField(max_length=100, blank=True, null=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     workgroup = models.ManyToManyField(Workgroup)
 

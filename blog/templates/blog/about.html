@@ -1,77 +1,23 @@
 {% extends "blog/blog_base.html" %}
 {% block content %}
 
-    <style>
-        /* Remove default bullets */
-        ul, #myUL {
-            list-style-type: none;
-        }
 
-        /* Remove margins and padding from the parent ul */
-        #myUL {
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Style the caret/arrow */
-        .caret {
-            cursor: pointer;
-            user-select: none; /* Prevent text selection */
-        }
-
-        /* Create the caret/arrow with a unicode, and style it */
-        .caret::before {
-            content: "\25B6";
-            color: black;
-            display: none;
-            margin-right: 6px;
-        }
-
-        /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
-        .caret-down::before {
-            display: none;
-        }
-
-        /* Hide the nested list */
-        .nested {
-            display: none;
-        }
-
-        /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
-        .active {
-            display: block;
-            margin-right: -10px;
-        }
-    </style>
-
-    <h1>About Blog</h1>
-
-    <div class="form-group col-md-5">
-        <ul id="myUL">
-            <li><input type="text" class="caret form-control mb-2" placeholder="Labor A" readonly>
-            <ul class="nested">
-                <li><input type="text" class="caret form-control mb-2" placeholder="Kühlschrank" readonly>
-                    <ul class="nested">
-                        <li><input type="text" class="form-control mb-2" placeholder="Kühlfach" readonly></li>
-                        <li><input type="text" class="form-control mb-2" placeholder="Gefrierfach" readonly></li>
-                    </ul>
-                </li>
-            </ul>
-            </li>
-        </ul>
+    <div class="card">
+        <div class="card card-header h1">About ChemData</div>
+        <div class="card-body">
+            Visit us on <a href="https://github.com/PythonFZ/ChemData">GitHub</a>
+            <hr>
+            The use of ChemData lies in the organization of chemical groups and the exchange of information.
+            Feel free to support us by requesting or adding new features.
+            <br>
+            The Current Version of ChemData is purely for development and may not be suitable for productive
+            environments yet!
+            <br>
+            Version 0 (<b>2020</b>)
+            <div class="text-muted">
+                Entwickelt von Fabian Zills, Erik Wimmer
+            </div>
+        </div>
     </div>
+
 {% endblock content %}
-
-{% block custom_js %}
-    <script>
-        var toggler = document.getElementsByClassName("caret");
-        var i;
-
-        for (i = 0; i < toggler.length; i++) {
-            toggler[i].addEventListener("click", function () {
-                this.parentElement.querySelector(".nested").classList.toggle("active");
-                this.classList.toggle("caret-down");
-            });
-        }
-    </script>
-{% endblock custom_js %}
