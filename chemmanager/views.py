@@ -288,8 +288,13 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
 
-class StorageListView(ListView):
+class StorageListView(LoginRequiredMixin, ListView):
     model = Storage
+
+    def get_queryset(self):
+        object_list = self.model.objects.filter(workgroup=self.request.user.profile.workgroup)
+
+        return object_list.order_by('name').distinct()
     # context_object_name = 'chemicals'
     # extra_context = {
     #     'title': 'Chemical Manager',
