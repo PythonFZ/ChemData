@@ -100,7 +100,7 @@ class ChemicalCreateView(CreateView):
             #     form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
             form.instance.creator = self.request.user
             form.instance.workgroup = self.request.user.profile.workgroup
-            return super().form_valid(form)
+            return super().form_valid(form, **kwargs)
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -114,15 +114,6 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         'title': 'Update',
         'delete': True,
     }
-
-    def get_form(self, form_class=None):
-        """Get unit from the associated stock"""
-        # TODO Clean order, so pubchem only gets queried when necessary!
-        form = super().get_form(form_class)
-        return form
-
-    def dispatch(self, request, *args, **kwargs):
-        return super(ChemicalUpdateView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form, **kwargs):
         form.instance.creator = self.request.user

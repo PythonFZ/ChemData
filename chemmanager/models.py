@@ -5,6 +5,7 @@ from django.urls import reverse
 from users.models import Workgroup
 from treebeard.mp_tree import MP_Node
 from django.utils.safestring import mark_safe
+from PIL import Image
 
 
 class Chemical(models.Model):
@@ -32,6 +33,17 @@ class Chemical(models.Model):
     def get_absolute_url(self):
         url = reverse('chemmanager-home') + '?q=' + self.name
         return url
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            with Image.open(self.image.path) as img:
+                if img.height > 250 or img.width > 250:
+                    output_size = (250, 250)
+                    img.thumbnail(output_size)
+                    img.save(self.image.path)
+        except ValueError:
+            print('No Image found')
 
 
 class Unit(models.Model):

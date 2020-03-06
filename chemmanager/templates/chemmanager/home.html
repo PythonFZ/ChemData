@@ -120,33 +120,43 @@
         <a href="{% url 'chemical-create' %}" class="btn btn-info">Add Chemical</a>
     </div>
     {% if chemical_detail %}
-        <div class="content-section">
-            <h5>{{ chemical_detail.name }}</h5>
-            <dl class="row">
-                {% if chemical_detail.molar_mass %}
-                    <dt class="col-sm-5">Molare Mass</dt>
-                    <dd class="col-sm-5"> {{ chemical_detail.molar_mass }} g/mol</dd>
-                {% endif %}
-                {% if chemical_detail.melting_point %}
-                    <dt class="col-sm-5">Melting Point</dt>
-                    <dd class="col-sm-5">{{ chemical_detail.melting_point }} °C</dd>
-                {% endif %}
-                {% if chemical_detail.boiling_point %}
-                    <dt class="col-sm-5">Boiling Point</dt>
-                    <dd class="col-sm-5">{{ chemical_detail.boiling_point }} °C</dd>
-                {% endif %}
-                {% if chemical_detail.density %}
-                    <dt class="col-sm-5">Density</dt>
-                    <dd class="col-sm-5">{{ chemical_detail.density }} g/L</dd>
-                {% endif %}
-            </dl>
+        <div class="card">
+            <div class="card-header h4">{{ chemical_detail.name }}</div>
+            <div class="card-body">
 
-            {% if chemical_detail.cid and not chemical_detail.image %}
-                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ chemical_detail.cid }}&width=250&height=250"
-                     alt="test">
-            {% elif chemical_detail.image %}
-                <img src="{{ chemical_detail.image.url }}" alt="not found">
-            {% endif %}
+                    {% if chemical_detail.molar_mass %}
+                        <div class="d-flex justify-content-between">
+                            <b>Molare Mass</b>
+                            <div>\( {{ chemical_detail.molar_mass }} ~ \mathrm{g}\cdot\mathrm{mol}^{-1}\)</div>
+                        </div>
+                    {% endif %}
+                    {% if chemical_detail.melting_point %}
+                        <div class="d-flex justify-content-between">
+                            <b>Melting Point</b>
+                            <div>\( {{ chemical_detail.melting_point }} ~ ^\circ \mathrm{C}\)</div>
+                        </div>
+                    {% endif %}
+                    {% if chemical_detail.boiling_point %}
+                        <div class="d-flex justify-content-between">
+                            <b>Boiling Point</b>
+                            <div>\({{ chemical_detail.boiling_point }} ~ ^\circ \mathrm{C}\)</div>
+                        </div>
+                    {% endif %}
+                    {% if chemical_detail.density %}
+                        <div class="d-flex justify-content-between">
+                            <b>Density</b>
+                            <div>\( {{ chemical_detail.density }} ~ \mathrm{g} \cdot \mathrm{cm}^{-3}\)</div>
+                        </div>
+                    {% endif %}
+                <div class="text-center mt-3">
+                    {% if chemical_detail.cid and not chemical_detail.image %}
+                        <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ chemical_detail.cid }}&width=250&height=250"
+                             alt="IMG" class="img-thumbnail">
+                    {% elif chemical_detail.image %}
+                        <img src="{{ chemical_detail.image.url }}" alt="not found" class="img-thumbnail">
+                    {% endif %}
+                </div>
+            </div>
         </div>
     {% endif %}
 
@@ -154,6 +164,8 @@
 {% endblock properties %}
 
 {% block custom_js %}
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();

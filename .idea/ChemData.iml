@@ -24,6 +24,7 @@
     <orderEntry type="library" name="vue" level="application" />
     <orderEntry type="library" name="index" level="application" />
     <orderEntry type="library" name="6d7a14736a" level="application" />
+    <orderEntry type="library" name="tex-mml-chtml" level="application" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
