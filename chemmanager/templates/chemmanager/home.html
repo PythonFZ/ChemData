@@ -12,9 +12,7 @@
             <!--end of col-->
             <div class="col-auto">&nbsp;</div>
             <div class="col-auto">
-                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals"
-                        onclick="localStorage.clear()">Search
-                </button>
+                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals">Search</button>
             </div>
             <!--end of col-->
         </div>
@@ -71,7 +69,7 @@
                                         <a href="{% url 'extraction-create' stock.id %}"
                                            class="btn btn-outline-info btn-sm w-100"
                                            data-toggle="tooltip" data-html="true"
-                                           title="Last Used {{ stock.extraction_set.last.date_created|date:"D d. F Y" }}"
+                                           title="Last Used {{ stock.extraction_set.first.date_created}}"
                                         >{{ stock.left_quantity }} {{ stock.unit }}</a>
                                     </th>
                                     {% if request.user_agent.is_pc %}
@@ -80,7 +78,7 @@
                                         {% else %}
                                             <th>-</th>
                                         {% endif %}
-                                        <th>{{ stock.extraction_set.last.date_created|date:"d.m.Y" }}</th>
+                                        <th>{{ stock.extraction_set.first.date_created|date:"d.m.Y" }}</th>
                                     {% endif %}
                                 </tr>
                             {% endif %}
@@ -117,7 +115,15 @@
 
 {% block properties %}
     <div class="content-section">
-        <a href="{% url 'chemical-create' %}" class="btn btn-info">Add Chemical</a>
+    <div class="btn-toolbar" role="toolbar">
+    <div class="btn-group mr-1" role="group">
+        <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical </a>
+    </div>
+    <div class="btn-group mr-1" role="group">
+        <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>
+    </div>
+    </div>
+
     </div>
     {% if chemical_detail %}
         <div class="card">
@@ -179,8 +185,12 @@
     </script>
     <script>
         $('.expand-chemical').click(function () {
-            localStorage.clear();
-            localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
+            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) !== 'open'){
+                localStorage.clear();
+                localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
+            }else {
+                localStorage.clear();
+            };
         });
     </script>
 {% endblock %}
