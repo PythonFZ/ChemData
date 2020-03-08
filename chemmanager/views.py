@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django import forms
+from django.db.models import Count
 from .models import Chemical, Stock, Extraction, Storage
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm
 from .utils import PubChemLoader, unit_converter
@@ -71,7 +71,8 @@ class ChemicalListView(ListView):
         if query:
             object_list = object_list.filter(name__icontains=query)
 
-        return object_list.order_by('name').distinct()
+        # Sort by most available / largest stock count and than by name!
+        return object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
 
     paginate_by = 10
 

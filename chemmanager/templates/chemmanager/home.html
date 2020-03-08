@@ -7,12 +7,12 @@
             <!--end of col-->
             <div class="col">
                 <input class="form-control form-control-lg form-control-borderless" type="text"
-                       placeholder="Search topics or keywords" name="q" value="{{ request.Get.q }}">
+                       placeholder="Search chemicals" name="q" value="{{ request.Get.q }}">
             </div>
             <!--end of col-->
             <div class="col-auto">&nbsp;</div>
             <div class="col-auto">
-                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals">Search</button>
+                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals" onclick="clear_local_storage()">Search</button>
             </div>
             <!--end of col-->
         </div>
@@ -26,9 +26,17 @@
                         <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}"
                            class="expand-chemical w-100" id="{{ chemical.id }}">
                             {% if request.user.profile.workgroup == chemical.workgroup %}
-                                <h4>{{ chemical.name }}</h4>
+                                {% if chemical.stock_set.count == 0 %}
+                                    <h4 class="text-muted">{{ chemical.name }}</h4>
+                                {% else %}
+                                    <h4>{{ chemical.name }}</h4>
+                                {% endif %}
                             {% else %}
-                                <h4>{{ chemical.name }} ({{ chemical.workgroup }})</h4>
+                                {% if chemical.stock_set.count == 0 %}
+                                    <h4 class="text-muted">{{ chemical.name }} ({{ chemical.workgroup }})</h4>
+                                {% else %}
+                                    <h4>{{ chemical.name }} ({{ chemical.workgroup }})</h4>
+                                {% endif %}
                             {% endif %}
                         </a>
                     </div>
@@ -38,8 +46,14 @@
                                 <button class="btn btn-info" name="chemical" type="submit" value="{{ chemical.id }}"><i
                                         class="fa fa-plus-circle"></i> Add
                                 </button>
-                                <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info"><i
+                                {% if request.user in chemical.allowed_edit %}
+                                    <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info"><i
+                                            class="fa fa-edit"></i> Edit</a>
+                                {% else %}
+                                    <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info disabled" aria-disabled="true"><i
                                         class="fa fa-edit"></i> Edit</a>
+                                {% endif %}
+
                             </div>
                         </form>
                     </div>
@@ -69,7 +83,7 @@
                                         <a href="{% url 'extraction-create' stock.id %}"
                                            class="btn btn-outline-info btn-sm w-100"
                                            data-toggle="tooltip" data-html="true"
-                                           title="Last Used {{ stock.extraction_set.first.date_created}}"
+                                           title="Last Used {{ stock.extraction_set.first.date_created }}"
                                         >{{ stock.left_quantity }} {{ stock.unit }}</a>
                                     </th>
                                     {% if request.user_agent.is_pc %}
@@ -115,14 +129,15 @@
 
 {% block properties %}
     <div class="content-section">
-    <div class="btn-toolbar" role="toolbar">
-    <div class="btn-group mr-1" role="group">
-        <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical </a>
-    </div>
-    <div class="btn-group mr-1" role="group">
-        <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>
-    </div>
-    </div>
+        <div class="btn-toolbar" role="toolbar">
+            <div class="btn-group mr-1" role="group">
+                <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical
+                </a>
+            </div>
+            <div class="btn-group mr-1" role="group">
+                <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>
+            </div>
+        </div>
 
     </div>
     {% if chemical_detail %}
@@ -130,30 +145,30 @@
             <div class="card-header h4">{{ chemical_detail.name }}</div>
             <div class="card-body">
 
-                    {% if chemical_detail.molar_mass %}
-                        <div class="d-flex justify-content-between">
-                            <b>Molare Mass</b>
-                            <div>\( {{ chemical_detail.molar_mass }} ~ \mathrm{g}\cdot\mathrm{mol}^{-1}\)</div>
-                        </div>
-                    {% endif %}
-                    {% if chemical_detail.melting_point %}
-                        <div class="d-flex justify-content-between">
-                            <b>Melting Point</b>
-                            <div>\( {{ chemical_detail.melting_point }} ~ ^\circ \mathrm{C}\)</div>
-                        </div>
-                    {% endif %}
-                    {% if chemical_detail.boiling_point %}
-                        <div class="d-flex justify-content-between">
-                            <b>Boiling Point</b>
-                            <div>\({{ chemical_detail.boiling_point }} ~ ^\circ \mathrm{C}\)</div>
-                        </div>
-                    {% endif %}
-                    {% if chemical_detail.density %}
-                        <div class="d-flex justify-content-between">
-                            <b>Density</b>
-                            <div>\( {{ chemical_detail.density }} ~ \mathrm{g} \cdot \mathrm{cm}^{-3}\)</div>
-                        </div>
-                    {% endif %}
+                {% if chemical_detail.molar_mass %}
+                    <div class="d-flex justify-content-between">
+                        <b>Molare Mass</b>
+                        <div>\( {{ chemical_detail.molar_mass }} ~ \mathrm{g}\cdot\mathrm{mol}^{-1}\)</div>
+                    </div>
+                {% endif %}
+                {% if chemical_detail.melting_point %}
+                    <div class="d-flex justify-content-between">
+                        <b>Melting Point</b>
+                        <div>\( {{ chemical_detail.melting_point }} ~ ^\circ \mathrm{C}\)</div>
+                    </div>
+                {% endif %}
+                {% if chemical_detail.boiling_point %}
+                    <div class="d-flex justify-content-between">
+                        <b>Boiling Point</b>
+                        <div>\({{ chemical_detail.boiling_point }} ~ ^\circ \mathrm{C}\)</div>
+                    </div>
+                {% endif %}
+                {% if chemical_detail.density %}
+                    <div class="d-flex justify-content-between">
+                        <b>Density</b>
+                        <div>\( {{ chemical_detail.density }} ~ \mathrm{g} \cdot \mathrm{cm}^{-3}\)</div>
+                    </div>
+                {% endif %}
                 <div class="text-center mt-3">
                     {% if chemical_detail.cid and not chemical_detail.image %}
                         <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ chemical_detail.cid }}&width=250&height=250"
@@ -162,6 +177,11 @@
                         <img src="{{ chemical_detail.image.url }}" alt="not found" class="img-thumbnail">
                     {% endif %}
                 </div>
+                {% if chemical_detail.comment %}
+                    <div class="mt-2">
+                        {{ chemical_detail.comment }}
+                    </div>
+                {% endif %}
             </div>
         </div>
     {% endif %}
@@ -182,31 +202,31 @@
                     $(this).collapse('show');
                 }
                 <!-- Show everything, if only one chemical is visible -->
-                if (collapse_elements.length === 2){
+                if (collapse_elements.length === 2) {
                     $(this).collapse('show');
                 }
             });
         });
     </script>
     <script>
-        var open_elements = []
-        for (var i = 0; i < localStorage.length; i++){
-            if (localStorage.key(i).substring(0,17) === 'open_collapseAll-') {
-                open_elements.push(localStorage.key(i));
-            }
-        }
         function clear_local_storage() {
+            var open_elements = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                if (localStorage.key(i).substring(0, 17) === 'open_collapseAll-') {
+                    open_elements.push(localStorage.key(i));
+                }
+            }
             for (var i = 0; i < open_elements.length; i++) {
                 localStorage.removeItem(open_elements[i]);
             }
         }
 
         $('.expand-chemical').click(function () {
-            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) !== 'open'){
-                clear_local_storage();
+            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) !== 'open') {
+                {#clear_local_storage();#}
                 localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
-            }else {
-                clear_local_storage();
+            } else {
+                localStorage.removeItem('open_' + 'collapseAll-' + this.id);
             }
         });
     </script>

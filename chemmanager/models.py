@@ -34,6 +34,10 @@ class Chemical(models.Model):
         url = reverse('chemical-list', kwargs={'pk': self.pk}) + '?q=' + self.name
         return url
 
+    @property
+    def allowed_edit(self):
+        return [self.creator]
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         try:
