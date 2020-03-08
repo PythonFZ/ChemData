@@ -12,7 +12,9 @@
             <!--end of col-->
             <div class="col-auto">&nbsp;</div>
             <div class="col-auto">
-                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals" onclick="clear_local_storage()">Search</button>
+                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals"
+                        onclick="clear_local_storage()">Search
+                </button>
             </div>
             <!--end of col-->
         </div>
@@ -27,15 +29,18 @@
                            class="expand-chemical w-100" id="{{ chemical.id }}">
                             {% if request.user.profile.workgroup == chemical.workgroup %}
                                 {% if chemical.stock_set.count == 0 %}
-                                    <h4 class="text-muted">{{ chemical.name }}</h4>
+                                    <h4 class="text-muted"><i
+                                            class="fas fa-caret-right expand_caret" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}</h4>
                                 {% else %}
-                                    <h4>{{ chemical.name }}</h4>
+                                    <h4><i class="fas fa-caret-right" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}</h4>
                                 {% endif %}
                             {% else %}
                                 {% if chemical.stock_set.count == 0 %}
-                                    <h4 class="text-muted">{{ chemical.name }} ({{ chemical.workgroup }})</h4>
+                                    <h4 class="text-muted"><i class="fas fa-caret-right" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
+                                        ({{ chemical.workgroup }})</h4>
                                 {% else %}
-                                    <h4>{{ chemical.name }} ({{ chemical.workgroup }})</h4>
+                                    <h4><i class="fas fa-caret-right" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }} ({{ chemical.workgroup }})
+                                    </h4>
                                 {% endif %}
                             {% endif %}
                         </a>
@@ -50,8 +55,9 @@
                                     <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info"><i
                                             class="fa fa-edit"></i> Edit</a>
                                 {% else %}
-                                    <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info disabled" aria-disabled="true"><i
-                                        class="fa fa-edit"></i> Edit</a>
+                                    <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info disabled"
+                                       aria-disabled="true"><i
+                                            class="fa fa-edit"></i> Edit</a>
                                 {% endif %}
 
                             </div>
@@ -200,6 +206,7 @@
                 // Default close unless saved as open
                 if (localStorage.getItem('open_' + this.id) === 'open') {
                     $(this).collapse('show');
+                    $('#caret-' + this.id).css('transform','rotate(' + '90deg)');
                 }
                 <!-- Show everything, if only one chemical is visible -->
                 if (collapse_elements.length === 2) {
