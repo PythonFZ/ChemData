@@ -65,7 +65,8 @@ class ChemicalListView(ListView):
             self.extra_context['chemical_detail'] = None
 
         object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
-        object_list = object_list | Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
+        object_list = object_list | Chemical.objects.filter(
+            stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
 
         query = self.request.GET.get('q')
         if query:
@@ -141,8 +142,9 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                                          f'Could not find Substance on PubChem!')
                     return self.render_to_response(context)
             else:
-                if Chemical.objects.filter(name=form.cleaned_data.get('name'),
-                                           workgroup=self.request.user.profile.workgroup).count() > 0:
+                if (form.cleaned_data.get('name') != chemical.name) and \
+                        (Chemical.objects.filter(name=form.cleaned_data.get('name'),
+                                                 workgroup=self.request.user.profile.workgroup).count() > 0):
                     messages.add_message(self.request, messages.WARNING,
                                          f'Chemical already created for Group {self.request.user.profile.workgroup}!')
                     return self.render_to_response(context)
@@ -271,7 +273,8 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         stock = Stock.objects.get(id=self.kwargs['pk'])
         form.instance.stock = stock
         if unit_converter(form.cleaned_data.get('quantity'), form.cleaned_data.get('unit'), stock):
-            if (stock.left_quantity - unit_converter(form.cleaned_data.get('quantity'), form.cleaned_data.get('unit'), stock)) <= 0:
+            if (stock.left_quantity - unit_converter(form.cleaned_data.get('quantity'), form.cleaned_data.get('unit'),
+                                                     stock)) <= 0:
                 path = reverse('stock-delete', args=[stock.id])
                 messages.add_message(self.request, messages.WARNING,
                                      f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>',
@@ -290,7 +293,7 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         Permit if Chemical is set to secret!
         """
         my_stock = Stock.objects.get(pk=self.kwargs['pk'])
-        if my_stock.storage.workgroup.filter(storage__workgroup=self.request.user.profile.workgroup) or\
+        if my_stock.storage.workgroup.filter(storage__workgroup=self.request.user.profile.workgroup) or \
                 my_stock.chemical.workgroup == self.request.user.profile.workgroup:
             if my_stock.chemical.secret and my_stock.chemical.workgroup != self.request.user.profile.workgroup:
                 return False
@@ -350,7 +353,8 @@ class StorageCreateView(LoginRequiredMixin, CreateView):
             workgroups = form.cleaned_data.get('workgroup')
         else:
             root_storage = Storage.objects.get(id=self.kwargs['pk'])
-            set_storage = root_storage.add_child(name=form.instance.name, room=form.instance.room, creator=self.request.user)
+            set_storage = root_storage.add_child(name=form.instance.name, room=form.instance.room,
+                                                 creator=self.request.user)
             workgroups = root_storage.workgroup.all()
         set_storage.workgroup.add(self.request.user.profile.workgroup)
         for group in workgroups:
