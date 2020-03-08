@@ -1,5 +1,6 @@
 import pubchempy as pcp
 import os.path
+from .models import Stock, Unit
 
 
 class PubChemLoader:
@@ -31,3 +32,24 @@ class PubChemLoader:
 
         return initial_dict
 
+
+def unit_converter(input_val, unit_name, stock: Stock):
+    """
+    Check unit and compare with Stock Unit, if different, try to convert:
+    """
+    unit = Unit.objects.filter(name=unit_name).first()
+    stock_unit = stock.unit
+    if unit == stock_unit:
+        print('1.')
+        return input_val
+    else:
+        fact = 1
+        if stock_unit != stock_unit.equals_standard_unit:
+            fact /= stock_unit.equals_standard
+            # Not ideal to set without saving, but works!
+            stock_unit = stock_unit.equals_standard_unit
+
+        if unit.equals_standard_unit == stock_unit:
+            return input_val * unit.equals_standard * fact
+        else:
+            return False

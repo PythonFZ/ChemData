@@ -7,7 +7,6 @@ from treebeard.mp_tree import MP_Node
 from django.utils.safestring import mark_safe
 from PIL import Image
 
-
 class Chemical(models.Model):
 
     name = models.CharField(max_length=250)
@@ -49,7 +48,7 @@ class Chemical(models.Model):
 class Unit(models.Model):
     name = models.CharField(max_length=100)
 
-    equals_standard = models.CharField(max_length=100, blank=True, null=True)
+    equals_standard = models.FloatField(blank=True, null=True)
     equals_standard_unit = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
@@ -95,17 +94,41 @@ class Stock(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
     date_changed = models.DateTimeField(auto_now=True)
 
-    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE, blank=True, null=True)
-    storage = models.ForeignKey(Storage, on_delete=models.CASCADE, blank=True, null=True)
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, blank=True, null=True)
+    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE,)
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE,)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
     @property
     def left_quantity(self):
-        left_quantity = self.quantity
-        for extraction in self.extraction_set.all():
-            left_quantity -= extraction.quantity
+        if self.unit:
+            left_quantity = self.quantity
+            for extraction in self.extraction_set.all():
+                left_quantity -= self.unit_converter(extraction)
 
-        return left_quantity
+            return left_quantity
+        else:
+            'ERROR'
+
+    def unit_converter(self, extraction):
+        """
+        Check unit and compare with Stock Unit, if different, try to convert:
+        """
+        # Has to be written twice, can otherwise not be imported
+        unit = extraction.unit
+        stock_unit = self.unit
+        if unit == stock_unit:
+            print('1.')
+            return extraction.quantity
+        else:
+            fact = 1
+            if stock_unit != stock_unit.equals_standard_unit:
+                fact /= stock_unit.equals_standard
+                stock_unit = stock_unit.equals_standard_unit
+
+            if unit.equals_standard_unit == stock_unit:
+                return extraction.quantity * unit.equals_standard * fact
+            else:
+                return 0
 
     def __str__(self):
         return self.name

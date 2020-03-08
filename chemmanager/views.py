@@ -6,7 +6,7 @@ from django.contrib import messages
 from django import forms
 from .models import Chemical, Stock, Extraction, Storage
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm
-from .utils import PubChemLoader
+from .utils import PubChemLoader, unit_converter
 
 
 class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -245,28 +245,33 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         # TODO Use units!
         left_quantity = stock.quantity
         for extraction in extractions:
-            left_quantity -= extraction.quantity
+            left_quantity -= unit_converter(extraction.quantity, extraction.unit, stock)
         kwargs.update({
             'stock': stock,
             'left_quantity': left_quantity,
         })
         return super(ExtractionCreateView, self).get_context_data(**kwargs)
 
-    def form_valid(self, form):
+    def form_valid(self, form, **kwargs):
         if self.request.POST.get('anonymous'):
             form.instance.user = None
         else:
             form.instance.user = self.request.user
-        form.instance.stock = Stock.objects.get(id=self.kwargs['pk'])
-
         stock = Stock.objects.get(id=self.kwargs['pk'])
-        if (stock.left_quantity - form.cleaned_data.get('quantity')) <= 0:
-            path = reverse('stock-delete', args=[stock.id])
-            messages.add_message(self.request, messages.WARNING,
-                                 f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>',
-                                 extra_tags='safe')
+        form.instance.stock = stock
+        if unit_converter(form.cleaned_data.get('quantity'), form.cleaned_data.get('unit'), stock):
+            if (stock.left_quantity - unit_converter(form.cleaned_data.get('quantity'), form.cleaned_data.get('unit'), stock)) <= 0:
+                path = reverse('stock-delete', args=[stock.id])
+                messages.add_message(self.request, messages.WARNING,
+                                     f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>',
+                                     extra_tags='safe')
 
-        return super().form_valid(form)
+            return super().form_valid(form)
+        else:
+            context = self.get_context_data(**kwargs)
+            messages.add_message(self.request, messages.WARNING,
+                                 f'Unit not supported!')
+            return self.render_to_response(context)
 
     def test_func(self):
         """Check if User is in group and allowed to add Extraction
