@@ -30,16 +30,22 @@
                             {% if request.user.profile.workgroup == chemical.workgroup %}
                                 {% if chemical.stock_set.count == 0 %}
                                     <h4 class="text-muted"><i
-                                            class="fas fa-caret-right expand_caret" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}</h4>
+                                            class="fas fa-caret-right expand_caret"
+                                            id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}</h4>
                                 {% else %}
-                                    <h4><i class="fas fa-caret-right" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}</h4>
+                                    <h4><i class="fas fa-caret-right"
+                                           id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}</h4>
+                                            {# |truncatechars:20#}
                                 {% endif %}
                             {% else %}
                                 {% if chemical.stock_set.count == 0 %}
-                                    <h4 class="text-muted"><i class="fas fa-caret-right" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
+                                    <h4 class="text-muted"><i class="fas fa-caret-right"
+                                                              id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                         ({{ chemical.workgroup }})</h4>
                                 {% else %}
-                                    <h4><i class="fas fa-caret-right" id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }} ({{ chemical.workgroup }})
+                                    <h4><i class="fas fa-caret-right"
+                                           id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
+                                        ({{ chemical.workgroup }})
                                     </h4>
                                 {% endif %}
                             {% endif %}
@@ -51,6 +57,9 @@
                                 <button class="btn btn-info" name="chemical" type="submit" value="{{ chemical.id }}"><i
                                         class="fa fa-plus-circle"></i> Add
                                 </button>
+                                {% if request.user_agent.is_mobile %}
+                                    <br>
+                                {% endif %}
                                 {% if request.user in chemical.allowed_edit %}
                                     <a href="{% url 'chemical-update' chemical.id %}" class="btn btn-info"><i
                                             class="fa fa-edit"></i> Edit</a>
@@ -111,32 +120,68 @@
 
     <!-- Pagination -->
     {% if is_paginated %}
-        {% if page_obj.has_previous %}
-            <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
-            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-        {% endif %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-circle pg-blue">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                    <li class="page-item">
+                        <a class="page-link" aria-label="Previous" href="?page={{ page_obj.previous_page_number }}">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><a class="page-link">First</a></li>
+                    <li class="page-item">
+                        <a class="page-link disabled" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                    </li>
+                {% endif %}
 
-        {% for num in paginator.page_range %}
-            {% if page_obj.number == num %}
-                <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
-            {% elif num > page_obj.number|add:'-3' and  num < page_obj.number|add:'3' %}
-                <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
-            {% endif %}
-        {% endfor %}
+                {% for num in paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% elif num > page_obj.number|add:'-3' and  num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
 
-
-        {% if page_obj.has_next %}
-            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
-            <a class="btn btn-outline-info mb-4" href="?page={{ paginator.num_pages }}">Last</a>
-        {% endif %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" aria-label="Next" href="?page={{ page_obj.next_page_number }}">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="?page={{ paginator.num_pages }}">Last</a></li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </li>
+                    <li class="page-item disabled"><a class="page-link">Last</a></li>
+                {% endif %}
+            </ul>
+        </nav>
     {% endif %}
-
 {% endblock content %}
 
 {% block properties %}
+    {% if request.user_agent.is_mobile %}
+        <br>
+        <hr>
+    {% endif %}
     <div class="content-section">
         <div class="btn-toolbar" role="toolbar">
-            <div class="btn-group mr-1" role="group">
+            {% if request.user_agent.is_mobile %}
+                <div class="btn-group mr-1 btn-group-sm" role="group">
+            {% else %}
+                <div class="btn-group mr-1" role="group">
+            {% endif %}
                 <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical
                 </a>
             </div>
@@ -206,7 +251,7 @@
                 // Default close unless saved as open
                 if (localStorage.getItem('open_' + this.id) === 'open') {
                     $(this).collapse('show');
-                    $('#caret-' + this.id).css('transform','rotate(' + '90deg)');
+                    $('#caret-' + this.id).css('transform', 'rotate(' + '90deg)');
                 }
                 <!-- Show everything, if only one chemical is visible -->
                 if (collapse_elements.length === 2) {
