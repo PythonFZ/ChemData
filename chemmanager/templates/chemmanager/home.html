@@ -175,22 +175,39 @@
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
-            $('.collapse').each(function () {
+            var collapse_elements = $('.collapse');
+            collapse_elements.each(function () {
                 // Default close unless saved as open
                 if (localStorage.getItem('open_' + this.id) === 'open') {
+                    $(this).collapse('show');
+                }
+                <!-- Show everything, if only one chemical is visible -->
+                if (collapse_elements.length === 2){
                     $(this).collapse('show');
                 }
             });
         });
     </script>
     <script>
+        var open_elements = []
+        for (var i = 0; i < localStorage.length; i++){
+            if (localStorage.key(i).substring(0,17) === 'open_collapseAll-') {
+                open_elements.push(localStorage.key(i));
+            }
+        }
+        function clear_local_storage() {
+            for (var i = 0; i < open_elements.length; i++) {
+                localStorage.removeItem(open_elements[i]);
+            }
+        }
+
         $('.expand-chemical').click(function () {
             if (localStorage.getItem('open_' + 'collapseAll-' + this.id) !== 'open'){
-                localStorage.clear();
+                clear_local_storage();
                 localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
             }else {
-                localStorage.clear();
-            };
+                clear_local_storage();
+            }
         });
     </script>
 {% endblock %}

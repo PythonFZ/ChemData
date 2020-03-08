@@ -40,13 +40,11 @@ def unit_converter(input_val, unit_name, stock: Stock):
     unit = Unit.objects.filter(name=unit_name).first()
     stock_unit = stock.unit
     if unit == stock_unit:
-        print('1.')
         return input_val
     else:
         fact = 1
         if stock_unit != stock_unit.equals_standard_unit:
             fact /= stock_unit.equals_standard
-            # Not ideal to set without saving, but works!
             stock_unit = stock_unit.equals_standard_unit
 
         if unit.equals_standard_unit == stock_unit:

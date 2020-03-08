@@ -7,6 +7,7 @@ from treebeard.mp_tree import MP_Node
 from django.utils.safestring import mark_safe
 from PIL import Image
 
+
 class Chemical(models.Model):
 
     name = models.CharField(max_length=250)
@@ -30,7 +31,7 @@ class Chemical(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        url = reverse('chemmanager-home') + '?q=' + self.name
+        url = reverse('chemical-list', kwargs={'pk': self.pk}) + '?q=' + self.name
         return url
 
     def save(self, *args, **kwargs):
@@ -117,7 +118,6 @@ class Stock(models.Model):
         unit = extraction.unit
         stock_unit = self.unit
         if unit == stock_unit:
-            print('1.')
             return extraction.quantity
         else:
             fact = 1
@@ -137,7 +137,7 @@ class Stock(models.Model):
         ordering = ['-date_changed']
 
     def get_absolute_url(self):
-        url = reverse('chemmanager-home') + '?q=' + self.chemical.name
+        url = reverse('chemical-list', kwargs={'pk': self.chemical.pk}) + '?q=' + self.chemical.name
         return url
 
 
