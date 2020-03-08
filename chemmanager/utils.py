@@ -26,9 +26,8 @@ class PubChemLoader:
         #if initial_dict.get('molar_mass') is None:
         if initial_dict.get('molar_mass') != self.compound.molecular_weight:
             initial_dict['molar_mass'] = self.compound.molecular_weight
-        if initial_dict['cid'] is None:
-            # self.load_img()
-            initial_dict['cid'] = self.compound.cid
+        # Has to be reset!
+        initial_dict['cid'] = self.compound.cid
 
         return initial_dict
 

@@ -15,11 +15,11 @@
 {% endblock content %}
 
 {% block properties %}
-        <div class="content-section">
-            <div class="d-flex w-100 justify-content-between article-metadata">
+    <div class="content-section">
+        <div class="d-flex w-100 justify-content-between article-metadata">
             <a href="{% url 'chemical-update' stock.chemical.id %}" class="btn btn-warning mb-2">Edit Chemical</a>
             <a href="{% url 'stock-delete' stock.id %}" class="btn btn-danger mb-2">Remove Stock</a>
-            </div>
+        </div>
         <div>
             <table class="table table-sm table-light">
                 <thead class="thead-light">
@@ -58,6 +58,9 @@
                 {% endif %}
             </table>
         </div>
+        {% if stock.comment %}
+            {{ stock.comment }}
+        {% endif %}
     </div>
     <div class="content-section">
     <div class="d-flex w-100 justify-content-between article-metadata">
