@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'blog.apps.BlogConfig',
     'crispy_forms',
     'treebeard',
+    "django_static_fontawesome",
     # 'django_select2',
     'django_user_agents',
     'django.contrib.admin',

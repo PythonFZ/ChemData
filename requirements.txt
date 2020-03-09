@@ -7,3 +7,4 @@ user-agents
 django-user-agents
 pubchempy
 django-treebeard
+django-static-fontawesome

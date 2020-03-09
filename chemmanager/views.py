@@ -68,6 +68,7 @@ class ChemicalListView(ListView):
         object_list = object_list | Chemical.objects.filter(
             stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
 
+
         query = self.request.GET.get('q')
         if query:
             object_list = object_list.filter(name__icontains=query)
@@ -126,36 +127,35 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     }
 
     def form_valid(self, form, **kwargs):
+        """
+        Check if Chemical is renamed to a Chemical, that already exists.
+        Call PubChemLoader for getting Data.
+        """
         form.instance.creator = self.request.user
         chemical = self.get_object()
 
-        if self.request.user == chemical.creator:
-            context = self.get_context_data(**kwargs)
-            if 'check_pubchem' in self.request.POST:
-                pubchemloader = PubChemLoader(chemical_name=form.cleaned_data.get('name'))
-                if pubchemloader.compound is not None:
-                    initial_dict = pubchemloader.generate_initial(initial_dict=form.cleaned_data)
-                    context['form'] = ChemicalCreateForm(initial=initial_dict)
-                    return self.render_to_response(context)
-                else:
-                    messages.add_message(self.request, messages.WARNING,
-                                         f'Could not find Substance on PubChem!')
-                    return self.render_to_response(context)
+        context = self.get_context_data(**kwargs)
+        if 'check_pubchem' in self.request.POST:
+            pubchemloader = PubChemLoader(chemical_name=form.cleaned_data.get('name'))
+            if pubchemloader.compound is not None:
+                initial_dict = pubchemloader.generate_initial(initial_dict=form.cleaned_data)
+                context['form'] = ChemicalCreateForm(initial=initial_dict)
+                return self.render_to_response(context)
             else:
-                if (form.cleaned_data.get('name') != chemical.name) and \
-                        (Chemical.objects.filter(name=form.cleaned_data.get('name'),
-                                                 workgroup=self.request.user.profile.workgroup).count() > 0):
-                    messages.add_message(self.request, messages.WARNING,
-                                         f'Chemical already created for Group {self.request.user.profile.workgroup}!')
-                    return self.render_to_response(context)
-                # Check if CID has been generated, that means always, that an Image should be available!
-                # if (form.data.get('image') == '') and (form.data.get('cid') is not None):
-                #     form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
-                return super().form_valid(form)
+                messages.add_message(self.request, messages.WARNING,
+                                     f'Could not find Substance on PubChem!')
+                return self.render_to_response(context)
         else:
-            messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
-                                                                 'Please contact your group admin.')
-            return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
+            if (form.cleaned_data.get('name') != chemical.name) and \
+                    (Chemical.objects.filter(name=form.cleaned_data.get('name'),
+                                             workgroup=self.request.user.profile.workgroup).count() > 0):
+                messages.add_message(self.request, messages.WARNING,
+                                     f'Chemical already created for Group {self.request.user.profile.workgroup}!')
+                return self.render_to_response(context)
+            # Check if CID has been generated, that means always, that an Image should be available!
+            # if (form.data.get('image') == '') and (form.data.get('cid') is not None):
+            #     form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
+            return super().form_valid(form)
 
     def test_func(self):
         chemical = self.get_object()

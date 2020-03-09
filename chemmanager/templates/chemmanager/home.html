@@ -1,4 +1,5 @@
 {% extends "chemmanager/chemmanager_base.html" %}
+{% load static %}
 {#{% load crispy_forms_tags %}#}
 
 {% block content %}
@@ -285,7 +286,7 @@
 {% endblock %}
 
 {% block custom_head %}
-    <script src="https://kit.fontawesome.com/6d7a14736a.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "fontawesome/css/all.min.css" %}" />
     <style>
         .btn-group-lg .btn, .btn-group-sm .btn {
             border-radius: 2px;
