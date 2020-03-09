@@ -38,6 +38,9 @@ class Chemical(models.Model):
     def allowed_edit(self):
         return [self.creator]
 
+    def test_func_1(self):
+        return self.stock_set.first().name
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         try:
@@ -98,6 +101,8 @@ class Stock(models.Model):
     comment = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(default=timezone.now)
     date_changed = models.DateTimeField(auto_now=True)
+
+    tag = models.CharField(max_length=10, blank=True, null=True)
 
     chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE,)
     storage = models.ForeignKey(Storage, on_delete=models.CASCADE,)

@@ -176,6 +176,9 @@ class ChemicalDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         chemical = self.get_object()
+        if chemical.stock_set.count() > 0:
+            messages.add_message(self.request, messages.WARNING, 'Can not delete Chemical with existing stock!')
+            return HttpResponseRedirect(reverse_lazy('chemical-update', kwargs={'pk': chemical.pk}))
         if self.request.user == chemical.creator:
             messages.add_message(self.request, messages.INFO, f'{chemical.name} successfully removed!')
             return super().delete(request, *args, **kwargs)

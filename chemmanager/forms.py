@@ -21,6 +21,7 @@ class ChemicalCreateForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
+            'molar_mass': forms.TextInput(),
             'comment': forms.Textarea(attrs={'rows': 4}),
             'secret': forms.CheckboxInput(),
             'cid': forms.HiddenInput(),
@@ -48,7 +49,7 @@ class StockUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Stock
-        fields = ('name', 'quantity', 'unit', 'comment', 'storage')
+        fields = ('name', 'quantity', 'unit', 'comment', 'storage', 'tag')
 
 
 class ExtractionCreateForm(forms.ModelForm):
@@ -58,8 +59,9 @@ class ExtractionCreateForm(forms.ModelForm):
 
         model = Extraction
         fields = ('quantity', 'unit', 'comment', 'date_created')
-
+        # TODO Placeholder!
         widgets = {
             'anonymous': forms.CheckboxInput(),
-            'comment': forms.Textarea(attrs={'rows': 4})
+            'comment': forms.Textarea(attrs={'rows': 4}),
+            'tag': forms.TextInput(attrs={'placeholder': 'Name'}),
         }
