@@ -12,6 +12,7 @@ from .views import (
     StorageCreateView,
     StorageDeleteView,
     ChemicalDetailView,
+    StorageUpdateView,
 )
 from django.contrib.auth.decorators import login_required
 
@@ -27,6 +28,7 @@ urlpatterns = [
     path('stock/<int:pk>/delete', StockDeleteView.as_view(), name='stock-delete'),
     path('storage/', StorageListView.as_view(), name='storage-list'),
     path('storage/<int:pk>/add/', StorageCreateView.as_view(), name='storage-create'),
+    path('storage/<int:pk>/update/', StorageUpdateView.as_view(), name='storage-update'),
     path('storage/<int:pk>/delete/', StorageDeleteView.as_view(), name='storage-delete'),
     path('chemical/<int:pk>/', ChemicalDetailView.as_view(), name='chemical-detail'),
 ]

@@ -26,6 +26,7 @@
                     <button class="btn btn-sm btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <a href="{% url 'storage-create' storage.id %}" class="dropdown-item">Add</a>
+                        <a href="{% url 'storage-update' storage.id %}" class="dropdown-item">Edit</a>
                         <a href="{% url 'storage-delete' storage.id %}" class="dropdown-item">Remove</a>
                     </div>
                 </td>
@@ -45,7 +46,8 @@
                         <button class="btn btn-sm btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a href="{% url 'storage-create' storage_child_1.id %}" class="dropdown-item">Add</a>
-                            <a href="{% url 'storage-delete' storage.id %}" class="dropdown-item">Remove</a>
+                            <a href="{% url 'storage-update' storage_child_1.id %}" class="dropdown-item">Edit</a>
+                            <a href="{% url 'storage-delete' storage_child_1.id %}" class="dropdown-item">Remove</a>
                         </div>
                     </td>
                 </tbody>
@@ -54,7 +56,11 @@
                         <td></td>
                         <td style="vertical-align: middle">{{ storage_child_2 }}</td>
                         <td>
-                            <a href="{% url 'storage-delete' storage.id %}" class="btn btn-sm btn-info">Remove</a>
+                            <button class="btn btn-sm btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a href="{% url 'storage-update' storage_child_2.id %}" class="dropdown-item">Edit</a>
+                                <a href="{% url 'storage-delete' storage_child_2.id %}" class="dropdown-item">Remove</a>
+                            </div>
                         </td>
                     </tbody>
                 {% endfor %}

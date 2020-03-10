@@ -66,6 +66,7 @@ class Unit(models.Model):
 class Storage(MP_Node):
     name = models.CharField(max_length=250)
     room = models.CharField(max_length=100, blank=True, null=True)
+    abbreviation = models.CharField(max_length=3, blank=True, null=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     workgroup = models.ManyToManyField(Workgroup)
 
@@ -74,6 +75,7 @@ class Storage(MP_Node):
     def __unicode__(self):
         return f'Place: {self.name}'
 
+    @property
     def location_name(self):
         '''Display Name like Place A (Subplace B, detailed Place C) in ListView'''
         if self.get_depth() > 1:
@@ -85,12 +87,24 @@ class Storage(MP_Node):
         else:
             return self.name
 
+    @property
+    def full_abbr(self):
+        my_abbr = ''
+        for ancestor in self.get_ancestors():
+            my_abbr += ancestor.abbreviation
+        if self.abbreviation:
+            my_abbr += self.abbreviation
+        return my_abbr
+
     def __str__(self):
         if self.workgroup.count() > 1:
             return mark_safe('&nbsp;&nbsp;' * (self.get_depth()-1) + self.name + ' (shared)')
         else:
+            str = '&nbsp;&nbsp;' * (self.get_depth()-1) + self.name
+            if self.abbreviation:
+                str += f'({self.abbreviation})'
             # Intended to show Tree-View like behaviour
-            return mark_safe('&nbsp;&nbsp;' * (self.get_depth()-1) + self.name)
+            return mark_safe(str)
 
 
 class Stock(models.Model):
@@ -102,7 +116,7 @@ class Stock(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
     date_changed = models.DateTimeField(auto_now=True)
 
-    tag = models.CharField(max_length=10, blank=True, null=True)
+    label = models.CharField(max_length=10, blank=True, null=True)
 
     chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE,)
     storage = models.ForeignKey(Storage, on_delete=models.CASCADE,)

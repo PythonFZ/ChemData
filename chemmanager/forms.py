@@ -9,7 +9,7 @@ class StorageCreateForm(forms.ModelForm):
 
     class Meta:
         model = Storage
-        fields = ('name', 'room', 'workgroup')
+        fields = ('name', 'room', 'workgroup', 'abbreviation')
 
 
 class ChemicalCreateForm(forms.ModelForm):
@@ -49,7 +49,7 @@ class StockUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Stock
-        fields = ('name', 'quantity', 'unit', 'comment', 'storage', 'tag')
+        fields = ('name', 'quantity', 'unit', 'comment', 'storage', 'label')
 
 
 class ExtractionCreateForm(forms.ModelForm):
@@ -63,5 +63,5 @@ class ExtractionCreateForm(forms.ModelForm):
         widgets = {
             'anonymous': forms.CheckboxInput(),
             'comment': forms.Textarea(attrs={'rows': 4}),
-            'tag': forms.TextInput(attrs={'placeholder': 'Name'}),
+            'label': forms.TextInput(attrs={'placeholder': 'Name'}),
         }

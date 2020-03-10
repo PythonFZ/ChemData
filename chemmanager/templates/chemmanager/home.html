@@ -63,8 +63,8 @@
                     </div>
                     <div class="p-2 text-muted">
                         {% for stock  in chemical.stock_set.all %}
-                            {% if stock.tag %}
-                                {{ stock.tag }} &nbsp;
+                            {% if stock.label %}
+                                <b>{{ stock.storage.full_abbr }}</b>{{ stock.label }}
                             {% endif %}
                         {% endfor %}
                     </div>
@@ -78,6 +78,7 @@
                             <th>Quantity</th>
                             {% if request.user_agent.is_pc %}
                                 <th>Location</th>
+                                <th>Label</th>
                                 <th>Last used</th>
                             {% endif %}
                         </tr>
@@ -103,6 +104,11 @@
                                         {% else %}
                                             <th>-</th>
                                         {% endif %}
+                                        {% if stock.label %}
+                                            <th>{{ stock.label }}</th>
+                                        {% else %}
+                                            <th>-</th>
+                                        {% endif %}
                                         <th>{{ stock.extraction_set.first.date_created|date:"d.m.Y" }}</th>
                                     {% endif %}
                                 </tr>
@@ -113,6 +119,7 @@
                             <th><button name="chemical" type="submit" value="{{ chemical.id }}" class="btn btn-primary btn-sm w-100" style="position: relative; right: 6px"><i class="fa fa-plus-circle"></i> Add</button></th>
                             <th></th>
                             {% if not request.user_agent.is_mobile %}
+                                <th></th>
                                 <th></th>
                                 <th></th>
                             {% endif %}

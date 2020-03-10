@@ -9,8 +9,8 @@ from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, St
 from .utils import PubChemLoader, unit_converter
 
 
-
 class ChemicalDetailView(DetailView):
+    # TODO user passes test!
     model = Chemical
 
 
@@ -54,6 +54,7 @@ class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 
 class ChemicalListView(ListView):
+    # TODO user passes test!
     model = Chemical
     template_name = 'chemmanager/home.html'
     context_object_name = 'chemicals'
@@ -81,7 +82,7 @@ class ChemicalListView(ListView):
         # Sort by most available / largest stock count and than by name!
         return object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
 
-    paginate_by = 8
+    paginate_by = 6
 
 
 class ChemicalCreateView(CreateView):
@@ -324,32 +325,10 @@ class StorageListView(LoginRequiredMixin, ListView):
         object_list = self.model.objects.filter(workgroup=self.request.user.profile.workgroup)
 
         return object_list.order_by('name').distinct()
-    # context_object_name = 'chemicals'
-    # extra_context = {
-    #     'title': 'Chemical Manager',
-    #     'chemical_detail': None,
-    # }
-    #
-    # def get_queryset(self):
-    #
-    #     if 'pk' in self.kwargs:
-    #         self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
-    #     else:
-    #         self.extra_context['chemical_detail'] = None
-    #
-    #     object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
-    #     object_list = object_list | Chemical.objects.filter(stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
-    #
-    #     query = self.request.GET.get('q')
-    #     if query:
-    #         object_list = object_list.filter(name__icontains=query)
-    #
-    #     return object_list.order_by('name').distinct()
-    #
-    # paginate_by = 10
 
 
 class StorageCreateView(LoginRequiredMixin, CreateView):
+    # TODO UserPassesTest!
     model = Storage
     form_class = StorageCreateForm
     success_url = reverse_lazy('storage-list')
@@ -391,6 +370,12 @@ class StorageCreateView(LoginRequiredMixin, CreateView):
                 'root_storage': root_storage,
             })
         return super(StorageCreateView, self).get_context_data(**kwargs)
+
+
+class StorageUpdateView(UpdateView):
+    model = Storage
+    form_class = StorageCreateForm
+    success_url = reverse_lazy('storage-list')
 
 
 class StorageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
