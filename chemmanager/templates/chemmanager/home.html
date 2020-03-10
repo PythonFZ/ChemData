@@ -34,7 +34,7 @@
             <div class="media-body">
                 <div class="d-flex justify-content-between">
                     <div class="p-2">
-                        <a href="{% url 'chemical-list' chemical.id %}?{{ request.GET.urlencode }}"
+                        <div
                            class="expand-chemical w-100" id="{{ chemical.id }}">
                             {% if request.user.profile.workgroup == chemical.workgroup %}
                                 {% if chemical.stock_set.count == 0 %}
@@ -59,7 +59,7 @@
                                     </h4>
                                 {% endif %}
                             {% endif %}
-                        </a>
+                        </div>
                     </div>
                     <div class="p-2 text-muted">
                         {% for stock  in chemical.stock_set.all %}
@@ -193,82 +193,36 @@
             <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>
         </div>
         </div>
-
     </div>
-    {% if chemical_detail %}
-        <div class="card">
-            <div class="card-header h4">
-                <div class="d-flex justify-content-between">
-                    {{ chemical_detail.name }}
-                    {% if request.user in chemical_detail.allowed_edit %}
-                        <a href="{% url 'chemical-update' chemical_detail.id %}"><i class="fa fa-edit" style="color: black"></i></a>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="card-body">
 
-                {% if chemical_detail.molar_mass %}
-                    <div class="d-flex justify-content-between">
-                        <b>Molare Mass</b>
-                        <div>\( {{ chemical_detail.molar_mass }} ~ \mathrm{g}\cdot\mathrm{mol}^{-1}\)</div>
-                    </div>
-                {% endif %}
-                {% if chemical_detail.melting_point %}
-                    <div class="d-flex justify-content-between">
-                        <b>Melting Point</b>
-                        <div>\( {{ chemical_detail.melting_point }} ~ ^\circ \mathrm{C}\)</div>
-                    </div>
-                {% endif %}
-                {% if chemical_detail.boiling_point %}
-                    <div class="d-flex justify-content-between">
-                        <b>Boiling Point</b>
-                        <div>\({{ chemical_detail.boiling_point }} ~ ^\circ \mathrm{C}\)</div>
-                    </div>
-                {% endif %}
-                {% if chemical_detail.density %}
-                    <div class="d-flex justify-content-between">
-                        <b>Density</b>
-                        <div>\( {{ chemical_detail.density }} ~ \mathrm{g} \cdot \mathrm{cm}^{-3}\)</div>
-                    </div>
-                {% endif %}
-                <div class="text-center mt-3">
-                    {% if chemical_detail.cid and not chemical_detail.image %}
-                        <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ chemical_detail.cid }}&width=250&height=250"
-                             alt="IMG" class="img-thumbnail">
-                    {% elif chemical_detail.image %}
-                        <img src="{{ chemical_detail.image.url }}" alt="not found" class="img-thumbnail">
-                    {% endif %}
-                </div>
-                {% if chemical_detail.comment %}
-                    <div class="mt-2">
-                        {{ chemical_detail.comment }}
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    {% endif %}
+    <div id="chemical_detail_div"></div>
+
 
 
 {% endblock properties %}
 
 {% block custom_js %}
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        $('.expand-chemical').click(function () {
+            {#var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, this.id.toString());#}
+            {#$('#chemical_detail_div').load(url);#}
+        });
+    </script>
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
             var collapse_elements = $('.collapse');
-            collapse_elements.each(function () {
-                // Default close unless saved as open
-                if (localStorage.getItem('open_' + this.id) === 'open') {
-                    $(this).collapse('show');
-                    $('#caret-' + this.id).css('transform', 'rotate(' + '90deg)');
-                }
-                <!-- Show everything, if only one chemical is visible -->
-                if (collapse_elements.length === 2) {
-                    $(this).collapse('show');
-                }
-            });
+            {#collapse_elements.each(function () {#}
+            {#    // Default close unless saved as open#}
+            {#    if (localStorage.getItem('open_' + this.id) === 'open') {#}
+            {#        $(this).collapse('show');#}
+            {#        $('#caret-' + this.id).css('transform', 'rotate(' + '90deg)');#}
+            {#    }#}
+            {#    <!-- Show everything, if only one chemical is visible -->#}
+            {#    if (collapse_elements.length === 2) {#}
+            {#        $(this).collapse('show');#}
+            {#    }#}
+            {#});#}
         });
     </script>
     <script>
@@ -283,19 +237,35 @@
                 localStorage.removeItem(open_elements[i]);
             }
         }
+        {##}
+        $('.collapse').on('show.bs.collapse', function () {
+            $('#caret-'+ this.id).css('transform', 'rotate(' + '90deg)');
+            var id = $(this).attr("id").split("collapseAll-")[1];
+            var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())
+            $('#chemical_detail_div').load(url);
+        });
+        $('.collapse').on('hide.bs.collapse', function () {
+            $('#caret-'+ this.id).css('transform', 'rotate(' + '0deg)');
+            var id = $(this).attr("id").split("collapseAll-")[1];
+            $('#chemical_detail_div').html('');
+        });
 
         $('.expand-chemical').click(function () {
-            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) !== 'open') {
+            $('#collapseAll-'+ this.id).collapse('toggle');
+            {#$('#caret-collapseAll-' + this.id).css('transform', 'rotate(' + '90deg)');#}
+
+            {#if (localStorage.getItem('open_' + 'collapseAll-' + this.id) !== 'open') {#}
                 {#clear_local_storage();#}
-                localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
-            } else {
-                localStorage.removeItem('open_' + 'collapseAll-' + this.id);
-            }
+            {#    localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');#}
+            {#} else {#}
+            {#    localStorage.removeItem('open_' + 'collapseAll-' + this.id);#}
+            {#}#}
         });
     </script>
 {% endblock %}
 
 {% block custom_head %}
+
     <link rel="stylesheet" type="text/css" href="{% static "fontawesome/css/all.min.css" %}"/>
     <style>
         .btn-group-lg .btn, .btn-group-sm .btn {

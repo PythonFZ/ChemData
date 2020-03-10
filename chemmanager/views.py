@@ -1,4 +1,4 @@
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
@@ -7,6 +7,11 @@ from django.db.models import Count
 from .models import Chemical, Stock, Extraction, Storage
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm
 from .utils import PubChemLoader, unit_converter
+
+
+
+class ChemicalDetailView(DetailView):
+    model = Chemical
 
 
 class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):

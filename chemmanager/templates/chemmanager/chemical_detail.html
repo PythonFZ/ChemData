@@ -1,6 +1,66 @@
-{% extends "chemmanager/chemmanager_base.html" %}
-{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
 
-{% block properties %}
-    <h1>{{ object.name }}</h1>
-{% endblock properties %}
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header h4">
+        <div class="d-flex justify-content-between">
+            {{ object.name }}
+            {% if request.user in object.allowed_edit %}
+                <a href="{% url 'chemical-update' object.id %}"><i class="fa fa-edit" style="color: black"></i></a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+
+        {% if object.molar_mass %}
+            <div class="d-flex justify-content-between">
+                <b>Molare Mass</b>
+                <div>\( {{ object.molar_mass }} ~ \mathrm{g}\cdot\mathrm{mol}^{-1}\)</div>
+            </div>
+        {% endif %}
+        {% if object.melting_point %}
+            <div class="d-flex justify-content-between">
+                <b>Melting Point</b>
+                <div>\( {{ object.melting_point }} ~ ^\circ \mathrm{C}\)</div>
+            </div>
+        {% endif %}
+        {% if object.boiling_point %}
+            <div class="d-flex justify-content-between">
+                <b>Boiling Point</b>
+                <div>\({{ object.boiling_point }} ~ ^\circ \mathrm{C}\)</div>
+            </div>
+        {% endif %}
+        {% if object.density %}
+            <div class="d-flex justify-content-between">
+                <b>Density</b>
+                <div>\( {{ object.density }} ~ \mathrm{g} \cdot \mathrm{cm}^{-3}\)</div>
+            </div>
+        {% endif %}
+        <div class="text-center mt-3">
+            {% if object.cid and not object.image %}
+                <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ object.cid }}&width=250&height=250"
+                     alt="IMG" class="img-thumbnail">
+            {% elif object.image %}
+                <img src="{{ object.image.url }}" alt="not found" class="img-thumbnail">
+            {% endif %}
+        </div>
+        {% if object.comment %}
+            <div class="mt-2">
+                {{ object.comment }}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="file://$PROJECT_DIR$" libraries="{6d7a14736a, font-awesome, index, mdb, tex-mml-chtml, vue}" />
+    <file url="file://$PROJECT_DIR$" libraries="{6d7a14736a, font-awesome, index, jquery-3.4.1, mdb, tex-mml-chtml, vue}" />
     <file url="PROJECT" libraries="{@types/7zip-min, bootstrap, jquery-3.4.1.slim}" />
   </component>
 </project>
