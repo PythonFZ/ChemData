@@ -32,28 +32,28 @@
         <div class="media-body">
             {% for chemical in chemicals %}
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
+                    <li class="list-group-item chemical-item">
                         <div>
                             <div class="d-flex justify-content-between">
                                 <div class="expand-chemical" id="{{ chemical.id }}">
                                     {% if request.user.profile.workgroup == chemical.workgroup %}
                                         {% if chemical.stock_set.count == 0 %}
-                                            <h4 class="text-muted"><i
+                                            <h4 class="text-muted chemical-item-header"><i
                                                     class="fas fa-caret-right expand_caret"
                                                     id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                             </h4>
                                         {% else %}
-                                            <h4><i class="fas fa-caret-right"
+                                            <h4 class="chemical-item-header"><i class="fas fa-caret-right"
                                                    id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                             </h4>
                                         {% endif %}
                                     {% else %}
                                         {% if chemical.stock_set.count == 0 %}
-                                            <h4 class="text-muted"><i class="fas fa-caret-right"
+                                            <h4 class="text-muted chemical-item-header"><i class="fas fa-caret-right"
                                                                       id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                                 ({{ chemical.workgroup }})</h4>
                                         {% else %}
-                                            <h4><i class="fas fa-caret-right"
+                                            <h4 class="chemical-item-header"><i class="fas fa-caret-right"
                                                    id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                                 ({{ chemical.workgroup }})
                                             </h4>
@@ -286,6 +286,15 @@
     <style>
         .btn-group-lg .btn, .btn-group-sm .btn {
             border-radius: 2px;
+        }
+        .chemical-item {
+            font-size: 100%;
+            font-weight: bolder;
+            padding-bottom: 0;
+        }
+        .chemical-item-header {
+            font-size: 120%;
+            font-weight: bolder;
         }
     </style>
 {% endblock %}

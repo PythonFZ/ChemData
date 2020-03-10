@@ -82,7 +82,7 @@ class ChemicalListView(ListView):
         # Sort by most available / largest stock count and than by name!
         return object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
 
-    paginate_by = 6
+    # paginate_by = 6
 
 
 class ChemicalCreateView(CreateView):
