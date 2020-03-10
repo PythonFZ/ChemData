@@ -32,7 +32,7 @@
         <div class="media-body">
             {% for chemical in chemicals %}
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item chemical-item">
+                    <li class="list-group-item chemical-item" id="list-item-{{ chemical.id }}">
                         <div>
                             <div class="d-flex justify-content-between">
                                 <div class="expand-chemical" id="{{ chemical.id }}">
@@ -268,16 +268,22 @@
             $('#chemical_detail_div').html('');
         });
 
-        $('.expand-chemical').click(function () {
-            $('#collapseAll-' + this.id).collapse('toggle');
+        $(function () {
+            $('.chemical-item').css('cursor', 'pointer')
 
-            if (localStorage.getItem('open_' + 'collapseAll-' + this.id) !== 'open') {
-                {#clear_local_storage();#}
-                localStorage.setItem('open_' + 'collapseAll-' + this.id, 'open');
-            } else{
-                localStorage.removeItem('open_' + 'collapseAll-' + this.id);
-            }
+            .click(function () {
+                var id = $(this).attr("id").split("list-item-")[1];
+                $('#collapseAll-' + id).collapse('toggle');
+
+                if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
+                    {#clear_local_storage();#}
+                    localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
+                } else{
+                    localStorage.removeItem('open_' + 'collapseAll-' + id);
+                }
+            });
         });
+
     </script>
 {% endblock %}
 
@@ -291,6 +297,9 @@
             font-size: 100%;
             font-weight: bolder;
             padding-bottom: 0;
+        }
+        .chemical-item:hover {
+            background-color: rgba(0, 0, 0, 0.01);
         }
         .chemical-item-header {
             font-size: 120%;
