@@ -242,7 +242,9 @@
             $('#caret-'+ this.id).css('transform', 'rotate(' + '90deg)');
             var id = $(this).attr("id").split("collapseAll-")[1];
             var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())
-            $('#chemical_detail_div').load(url);
+            $('#chemical_detail_div').load(url, function () {
+                MathJax.typeset()
+            });
         });
         $('.collapse').on('hide.bs.collapse', function () {
             $('#caret-'+ this.id).css('transform', 'rotate(' + '0deg)');
@@ -265,7 +267,6 @@
 {% endblock %}
 
 {% block custom_head %}
-
     <link rel="stylesheet" type="text/css" href="{% static "fontawesome/css/all.min.css" %}"/>
     <style>
         .btn-group-lg .btn, .btn-group-sm .btn {
