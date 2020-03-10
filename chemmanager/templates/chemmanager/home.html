@@ -112,8 +112,10 @@
                         <tr>
                             <th><button name="chemical" type="submit" value="{{ chemical.id }}" class="btn btn-primary btn-sm w-100" style="position: relative; right: 6px"><i class="fa fa-plus-circle"></i> Add</button></th>
                             <th></th>
-                            <th></th>
-                            <th></th>
+                            {% if not request.user_agent.is_mobile %}
+                                <th></th>
+                                <th></th>
+                            {% endif %}
                         </tr>
                         </form>
                     </table>
