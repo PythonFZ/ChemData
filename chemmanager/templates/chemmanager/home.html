@@ -1,25 +1,41 @@
 {% extends "chemmanager/chemmanager_base.html" %}
 {% load static %}
 {#{% load crispy_forms_tags %}#}
-
-{% block content %}
-    <form class="media mb-2">
-        <div class="media-body row no-gutters align-items-center">
-            <!--end of col-->
-            <div class="col">
-                <input class="form-control form-control-lg form-control-borderless" type="text"
-                       placeholder="Search chemicals" name="q" value="{{ request.Get.q }}">
-            </div>
-            <!--end of col-->
-            <div class="col-auto">&nbsp;</div>
-            <div class="col-auto">
-                <button class="btn btn-lg btn-success" type="submit" value="Search Chemicals"
-                        onclick="clear_local_storage()">Search
-                </button>
-            </div>
-            <!--end of col-->
+{% block search_bar %}
+    <div class="row">
+        <div class="col-sm-8">
+            <form>
+                <div class="md-form input-group">
+                    <input type="text" class="form-control" placeholder="Search Chemicals" aria-label="Search Chemicals"
+                           aria-describedby="MaterialButton-addon2" name="q" value="{{ request.GET.q }}" style="font-size: 150%">
+                    <div class="input-group-append">
+                        <button class="btn btn-lg btn-success m-0" type="submit" id="MaterialButton-addon2"
+                                value="Search Chemicals" onclick="clear_local_storage()">Search</button>
+                        <button class="btn btn-btn-lg btn-success m-0 dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                        <div class="dropdown-menu">
+                            <a href="{% url 'chemmanager-home' %}" class="dropdown-item" onclick="clear_local_storage()">
+                                <i class="fas fa-undo"></i>&nbsp;Reset</a>
+                            <a href="{% url 'chemical-create' %}" class="dropdown-item" onclick="clear_local_storage()">
+                                <i class="fas fa-plus"></i>&nbsp;Add Chemical</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
+        <div class="col-sm-4" style="padding-top: 25px; font-size: 100%">
+            <select class="chemical-search-parameter w-100" name="states[]" multiple="multiple">
+                <option value="AL">All Synonyms</option>
+                <option value="WY">All Workgroups</option>
+                <option value="WY">AK1</option>
+                <option value="WY">AK2</option>
+                <option value="WY">User</option>
+            </select>
+        </div>
+    </div>
+
+{% endblock %}
+{% block content %}
+
 
     {% if not chemicals %}
         <div class="text-center">
@@ -44,17 +60,17 @@
                                             </h4>
                                         {% else %}
                                             <h4 class="chemical-item-header"><i class="fas fa-caret-right"
-                                                   id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
+                                                                                id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                             </h4>
                                         {% endif %}
                                     {% else %}
                                         {% if chemical.stock_set.count == 0 %}
                                             <h4 class="text-muted chemical-item-header"><i class="fas fa-caret-right"
-                                                                      id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
+                                                                                           id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                                 ({{ chemical.workgroup }})</h4>
                                         {% else %}
                                             <h4 class="chemical-item-header"><i class="fas fa-caret-right"
-                                                   id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
+                                                                                id="caret-collapseAll-{{ chemical.id }}"></i> {{ chemical.name }}
                                                 ({{ chemical.workgroup }})
                                             </h4>
                                         {% endif %}
@@ -114,23 +130,23 @@
                                     {% endif %}
                                 {% endfor %}
                                 <form action="{% url 'stock-create' chemical.id %}">
-                                {% if request.user.profile.workgroup == chemical.workgroup %}
-                                    <tr>
-                                        <th>
-                                            <button name="chemical" type="submit" value="{{ chemical.id }}"
-                                                    class="btn btn-primary btn-sm w-100"
-                                                    style="position: relative; right: 6px"><i
-                                                    class="fa fa-plus-circle"></i> Add
-                                            </button>
-                                        </th>
-                                        <th></th>
-                                        {% if not request.user_agent.is_mobile %}
+                                    {% if request.user.profile.workgroup == chemical.workgroup %}
+                                        <tr>
+                                            <th>
+                                                <button name="chemical" type="submit" value="{{ chemical.id }}"
+                                                        class="btn btn-primary btn-sm w-100"
+                                                        style="position: relative; right: 6px"><i
+                                                        class="fa fa-plus-circle"></i> Add
+                                                </button>
+                                            </th>
                                             <th></th>
-                                            <th></th>
-                                            <th></th>
-                                        {% endif %}
-                                    </tr>
-                                {% endif %}
+                                            {% if not request.user_agent.is_mobile %}
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
                                 </form>
                             </table>
                         </div>
@@ -193,27 +209,24 @@
 {% endblock content %}
 
 {% block properties %}
-    {% if request.user_agent.is_mobile %}
-        <br>
-        <hr>
-    {% endif %}
-    <div class="card mb-4">
-    <div class="card-body">
-        <div class="btn-toolbar" role="toolbar">
-            {% if request.user_agent.is_mobile %}
-                <div class="btn-group mr-1 btn-group-sm" role="group">
-            {% else %}
-                <div class="btn-group mr-1" role="group">
-            {% endif %}
-            <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical
-            </a>
-            </div>
-            <div class="btn-group mr-1" role="group">
-                <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>
-            </div>
-            </div>
-        </div>
-    </div>
+{#    <p style="padding-bottom: 80px"></p>#}
+{#    <div class="card mb-4">#}
+{#    <div class="card-body">#}
+{#        <div class="btn-toolbar" role="toolbar">#}
+{#            {% if request.user_agent.is_mobile %}#}
+{#                <div class="btn-group mr-1 btn-group-sm" role="group">#}
+{#            {% else %}#}
+{#                <div class="btn-group mr-1" role="group">#}
+{#            {% endif %}#}
+{#            <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical#}
+{#            </a>#}
+{#            </div>#}
+{#            <div class="btn-group mr-1" role="group">#}
+{#                <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>#}
+{#            </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 
     <div id="chemical_detail_div"></div>
 
@@ -228,6 +241,10 @@
     </script>
     <script>
         $(document).ready(function () {
+            $('.chemical-search-parameter').select2({
+                placeholder: 'Choose additional Search-Parameter',
+                allowClear: true
+            });
             $('[data-toggle="tooltip"]').tooltip();
             var collapse_elements = $('.collapse');
             collapse_elements.each(function () {
@@ -272,26 +289,26 @@
 
         $(function () {
             $('.chemical-item').css('cursor', 'pointer')
-                
-            .hover(function () {
-                var id = $(this).attr("id").split("list-item-")[1];
-                var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())
-                $('#chemical_detail_div').load(url, function () {
-                    MathJax.typeset()
+
+                {#.hover(function () {#}
+                {#    var id = $(this).attr("id").split("list-item-")[1];#}
+                {#    var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())#}
+                {#    $('#chemical_detail_div').load(url, function () {#}
+                {#        MathJax.typeset()#}
+                {#    });#}
+                {#})#}
+
+                .click(function () {
+                    var id = $(this).attr("id").split("list-item-")[1];
+                    $('#collapseAll-' + id).collapse('toggle');
+
+                    if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
+                        {#clear_local_storage();#}
+                        localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
+                    } else {
+                        localStorage.removeItem('open_' + 'collapseAll-' + id);
+                    }
                 });
-            })
-
-            .click(function () {
-                var id = $(this).attr("id").split("list-item-")[1];
-                $('#collapseAll-' + id).collapse('toggle');
-
-                if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
-                    {#clear_local_storage();#}
-                    localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
-                } else{
-                    localStorage.removeItem('open_' + 'collapseAll-' + id);
-                }
-            });
         });
 
     </script>
@@ -303,14 +320,17 @@
         .btn-group-lg .btn, .btn-group-sm .btn {
             border-radius: 2px;
         }
+
         .chemical-item {
             font-size: 100%;
             font-weight: bolder;
             padding-bottom: 0;
         }
+
         .chemical-item:hover {
             background-color: rgba(0, 0, 0, 0.01);
         }
+
         .chemical-item-header {
             font-size: 120%;
             font-weight: bolder;
