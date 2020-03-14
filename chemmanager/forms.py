@@ -16,11 +16,12 @@ class ChemicalCreateForm(forms.ModelForm):
 
     class Meta:
         model = Chemical
-        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point',
+        fields = ('name', 'structure', 'distributor', 'molar_mass', 'density', 'melting_point', 'boiling_point',
                   'comment', 'image', 'cid', 'secret')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
+            'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aaldrich'}),
             'molar_mass': forms.TextInput(),
             'comment': forms.Textarea(attrs={'rows': 4}),
             'secret': forms.CheckboxInput(),
@@ -49,7 +50,10 @@ class StockUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Stock
-        fields = ('name', 'quantity', 'unit', 'comment', 'storage', 'label')
+        fields = ('name', 'distributor', 'quantity', 'unit', 'comment', 'storage', 'label')
+        widgets = {
+            'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aaldrich'})
+        }
 
 
 class ExtractionCreateForm(forms.ModelForm):

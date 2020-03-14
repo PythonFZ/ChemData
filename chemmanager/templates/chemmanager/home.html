@@ -92,6 +92,7 @@
                                     <th>Name</th>
                                     <th>Quantity</th>
                                     {% if request.user_agent.is_pc %}
+                                        <th>Distributor</th>
                                         <th>Location</th>
                                         <th>Label</th>
                                         <th>Last used</th>
@@ -114,6 +115,11 @@
                                                 >{{ stock.left_quantity }} {{ stock.unit }}</a>
                                             </th>
                                             {% if request.user_agent.is_pc %}
+                                                {% if stock.distributor %}
+                                                    <th> {{ stock.distributor }}</th>
+                                                {% else %}
+                                                    <th>-</th>
+                                                {% endif %}
                                                 {% if stock.storage %}
                                                     <th>{{ stock.storage.location_name }}</th>
                                                 {% else %}

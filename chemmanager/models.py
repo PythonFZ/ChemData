@@ -10,9 +10,11 @@ from PIL import Image
 
 class Chemical(models.Model):
 
+    #TODO use distributor (First stock creation)
     name = models.CharField(max_length=250)
     structure = models.CharField(max_length=250, blank=True, null=True)
     molar_mass = models.FloatField(blank=True, null=True)
+    distributor = models.CharField(max_length=250, blank=True, null=True)
     density = models.FloatField(blank=True, null=True)
     melting_point = models.FloatField(blank=True, null=True)
     boiling_point = models.FloatField(blank=True, null=True)
@@ -91,7 +93,7 @@ class Storage(MP_Node):
     def full_abbr(self):
         my_abbr = ''
         for ancestor in self.get_ancestors():
-            my_abbr += ancestor.abbreviation
+            my_abbr += str(ancestor.abbreviation)
         if self.abbreviation:
             my_abbr += self.abbreviation
         return my_abbr
@@ -111,6 +113,7 @@ class Stock(models.Model):
 
     name = models.CharField(max_length=250)
 
+    distributor = models.CharField(max_length=250, blank=True, null=True)
     quantity = models.FloatField()
     comment = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(default=timezone.now)
