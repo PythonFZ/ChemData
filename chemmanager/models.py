@@ -93,7 +93,10 @@ class Storage(MP_Node):
     def full_abbr(self):
         my_abbr = ''
         for ancestor in self.get_ancestors():
-            my_abbr += str(ancestor.abbreviation)
+            if ancestor.abbreviation == None:
+                pass
+            else:
+                my_abbr += str(ancestor.abbreviation)
         if self.abbreviation:
             my_abbr += self.abbreviation
         return my_abbr
