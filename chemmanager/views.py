@@ -10,12 +10,12 @@ from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, St
 from .utils import PubChemLoader, unit_converter
 
 
-class ChemicalDetailView(DetailView):
+class ChemicalDetailView(LoginRequiredMixin, DetailView):
     # TODO user passes test!
     model = Chemical
 
 
-class DistributorAutocomplete(autocomplete.Select2QuerySetView):
+class DistributorAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Distributor.objects.all()
 
@@ -85,10 +85,9 @@ class ChemicalListView(ListView):
         object_list = object_list | Chemical.objects.filter(
             stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
 
-
         query = self.request.GET.get('q')
         if query:
-            object_list = object_list.filter(name__icontains=query)
+            object_list = object_list.filter(name__icontains=query) | object_list.filter(cas__startswith=query)
 
         # Sort by most available / largest stock count and than by name!
         return object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()

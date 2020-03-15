@@ -33,6 +33,12 @@
                 <div>\( {{ object.density }} ~ \mathrm{g} \cdot \mathrm{cm}^{-3}\)</div>
             </div>
         {% endif %}
+        {% if object.cas %}
+            <div class="d-flex justify-content-between">
+                <b>CAS</b>
+                <div>{{ object.cas }}</div>
+            </div>
+        {% endif %}
         <div class="text-center mt-3">
             {% if object.cid and not object.image %}
                 <img src="https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={{ object.cid }}&width=250&height=250"
