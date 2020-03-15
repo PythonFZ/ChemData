@@ -1,6 +1,14 @@
 from django import forms
 from dal import autocomplete
-from .models import Chemical, Stock, Extraction, Storage, Distributor
+from .models import Chemical, Stock, Extraction, Storage
+
+
+class SearchParameterForm(forms.Form):
+    p = forms.MultipleChoiceField(
+        widget=autocomplete.Select2Multiple(url='search-parameter-autocomplete'),
+        label='Search Parameter',
+        required=False,
+    )
 
 
 class StorageCreateForm(forms.ModelForm):

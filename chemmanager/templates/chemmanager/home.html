@@ -20,17 +20,13 @@
                         </div>
                     </div>
                 </div>
-            </form>
         </div>
         <div class="col-sm-4" style="padding-top: 25px; font-size: 100%">
-            <select class="chemical-search-parameter w-100" name="states[]" multiple="multiple">
-                <option value="AL">All Synonyms</option>
-                <option value="WY">All Workgroups</option>
-                <option value="WY">AK1</option>
-                <option value="WY">AK2</option>
-                <option value="WY">User</option>
-            </select>
+            {{ parameter_form }}
+            {{ parameter_form.media }}
         </div>
+                </form>
+
     </div>
 
 {% endblock %}
@@ -241,8 +237,8 @@
 {% block custom_js %}
 
     <!-- Select2 -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+{#    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />#}
+{#    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>#}
 
     <script>
         $('.expand-chemical').click(function () {

@@ -5,14 +5,23 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Count
 from dal import autocomplete
-from .models import Chemical, Stock, Extraction, Storage, Distributor
-from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm
+from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup
+from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm
 from .utils import PubChemLoader, unit_converter
 
 
 class ChemicalDetailView(LoginRequiredMixin, DetailView):
     # TODO user passes test!
     model = Chemical
+
+
+class SearchParameterAutocomplete(LoginRequiredMixin, autocomplete.Select2ListView):
+    def get_list(self):
+        parameter_list = []
+        for my_storage in Storage.objects.filter(workgroup=self.request.user.profile.workgroup).all():
+            for workgroup in my_storage.workgroup.all():
+                parameter_list.append(workgroup.name)
+        return list(set(parameter_list))
 
 
 class DistributorAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
@@ -66,6 +75,7 @@ class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class ChemicalListView(ListView):
     # TODO user passes test!
+    # TODO Search-parameter sollten beim neuladen der Seite nicht gelöscht werden!
     model = Chemical
     template_name = 'chemmanager/home.html'
     context_object_name = 'chemicals'
@@ -76,14 +86,22 @@ class ChemicalListView(ListView):
 
     def get_queryset(self):
 
+        # TODO Was passiert hier? Ersetzt durch jquery?!
         if 'pk' in self.kwargs:
             self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
         else:
             self.extra_context['chemical_detail'] = None
 
         object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
-        object_list = object_list | Chemical.objects.filter(
-            stock__storage__workgroup=self.request.user.profile.workgroup).exclude(secret=True)
+
+
+        parameter = self.request.GET.getlist('p')
+        # TODO add extra parameters
+        # Check Workgroups:
+        for param in parameter:
+            curr_workgroup = Workgroup.objects.get(name=param)
+            object_list = object_list | Chemical.objects.filter(
+                stock__storage__workgroup=curr_workgroup, workgroup=curr_workgroup).exclude(secret=True)
 
         query = self.request.GET.get('q')
         if query:
@@ -91,6 +109,12 @@ class ChemicalListView(ListView):
 
         # Sort by most available / largest stock count and than by name!
         return object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
+
+    def get_context_data(self, **kwargs):
+        kwargs.update({
+            'parameter_form': SearchParameterForm,
+        })
+        return super(ChemicalListView, self).get_context_data(**kwargs)
 
     # paginate_by = 6
 
