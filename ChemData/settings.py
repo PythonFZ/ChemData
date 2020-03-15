@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'treebeard',
     "django_static_fontawesome",
+    'dal',
+    'dal_select2',
     # 'django_select2',
     'django_user_agents',
     'django.contrib.admin',

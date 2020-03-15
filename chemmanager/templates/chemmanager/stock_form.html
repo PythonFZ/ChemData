@@ -26,3 +26,12 @@
         </form>
     </div>
 {% endblock content %}
+
+{% block custom_js %}
+            {{ form.media }}
+    <style>
+    .select2-container .select2-selection--single {
+        height: 40px;
+    }
+    </style>
+{% endblock %}

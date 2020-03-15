@@ -1,5 +1,6 @@
 from django import forms
-from .models import Chemical, Stock, Extraction, Storage
+from dal import autocomplete
+from .models import Chemical, Stock, Extraction, Storage, Distributor
 
 
 class StorageCreateForm(forms.ModelForm):
@@ -16,12 +17,11 @@ class ChemicalCreateForm(forms.ModelForm):
 
     class Meta:
         model = Chemical
-        fields = ('name', 'structure', 'distributor', 'molar_mass', 'density', 'melting_point', 'boiling_point',
-                  'comment', 'image', 'cid', 'secret')
+        fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point',
+                  'comment', 'cas', 'image', 'secret', 'cid')
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Ethanol'}),
             'structure': forms.TextInput(attrs={'placeholder': 'e.g. CH3OH'}),
-            'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aaldrich'}),
             'molar_mass': forms.TextInput(),
             'comment': forms.Textarea(attrs={'rows': 4}),
             'secret': forms.CheckboxInput(),
@@ -38,10 +38,15 @@ class ChemicalCreateForm(forms.ModelForm):
             'boiling_point': 'Boiling Point in °C',
             'molar_mass': html_script + 'Molar Mass in \(\mathrm{g}\cdot\mathrm{mol}^{-1}\)',
             'image': 'Image (leave empty for default pubchem img search)',
+            'cas': 'CAS',
         }
 
 
 class StockUpdateForm(forms.ModelForm):
+    # distributor = forms.ModelChoiceField(
+    #     queryset=Distributor.objects.all(),
+    #     widget=autocomplete.ModelSelect2(url='distributor-autocomplete')
+    # )
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
@@ -52,7 +57,10 @@ class StockUpdateForm(forms.ModelForm):
         model = Stock
         fields = ('name', 'distributor', 'quantity', 'unit', 'comment', 'storage', 'label')
         widgets = {
-            'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aaldrich'})
+            # 'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aaldrich'}),
+            'distributor': autocomplete.ModelSelect2(
+                url='distributor-autocomplete',
+                attrs={'data-placeholder': 'e.g. Sigma Aaldrich'}),
         }
 
 

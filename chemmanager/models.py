@@ -8,13 +8,20 @@ from django.utils.safestring import mark_safe
 from PIL import Image
 
 
+class Distributor(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class Chemical(models.Model):
 
     #TODO use distributor (First stock creation)
     name = models.CharField(max_length=250)
     structure = models.CharField(max_length=250, blank=True, null=True)
     molar_mass = models.FloatField(blank=True, null=True)
-    distributor = models.CharField(max_length=250, blank=True, null=True)
+    # distributor = models.CharField(max_length=250, blank=True, null=True)
     density = models.FloatField(blank=True, null=True)
     melting_point = models.FloatField(blank=True, null=True)
     boiling_point = models.FloatField(blank=True, null=True)
@@ -116,7 +123,8 @@ class Stock(models.Model):
 
     name = models.CharField(max_length=250)
 
-    distributor = models.CharField(max_length=250, blank=True, null=True)
+    distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE, blank=True, null=True)
+    price = models.FloatField(blank=True, null=True)
     quantity = models.FloatField()
     comment = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(default=timezone.now)

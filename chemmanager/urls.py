@@ -13,6 +13,7 @@ from .views import (
     StorageDeleteView,
     ChemicalDetailView,
     StorageUpdateView,
+    DistributorAutocomplete,
 )
 from django.contrib.auth.decorators import login_required
 
@@ -31,4 +32,5 @@ urlpatterns = [
     path('storage/<int:pk>/update/', StorageUpdateView.as_view(), name='storage-update'),
     path('storage/<int:pk>/delete/', StorageDeleteView.as_view(), name='storage-delete'),
     path('chemical/<int:pk>/', ChemicalDetailView.as_view(), name='chemical-detail'),
+    path('distributor-autocomplete/', DistributorAutocomplete.as_view(create_field='name'), name='distributor-autocomplete'),
 ]

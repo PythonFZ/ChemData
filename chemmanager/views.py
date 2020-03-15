@@ -4,7 +4,8 @@ from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Count
-from .models import Chemical, Stock, Extraction, Storage
+from dal import autocomplete
+from .models import Chemical, Stock, Extraction, Storage, Distributor
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm
 from .utils import PubChemLoader, unit_converter
 
@@ -12,6 +13,16 @@ from .utils import PubChemLoader, unit_converter
 class ChemicalDetailView(DetailView):
     # TODO user passes test!
     model = Chemical
+
+
+class DistributorAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Distributor.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
 
 
 class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
