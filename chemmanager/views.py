@@ -17,7 +17,7 @@ class ChemicalDetailView(LoginRequiredMixin, DetailView):
 
 class SearchParameterAutocomplete(LoginRequiredMixin, autocomplete.Select2ListView):
     def get_list(self):
-        parameter_list = []
+        parameter_list = ['only stocked']
         for my_storage in Storage.objects.filter(workgroup=self.request.user.profile.workgroup).all():
             for workgroup in my_storage.workgroup.all():
                 parameter_list.append(workgroup.name)
@@ -73,7 +73,7 @@ class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
 
-class ChemicalListView(ListView):
+class ChemicalListView(LoginRequiredMixin, ListView):
     # TODO user passes test!
     # TODO Search-parameter sollten beim neuladen der Seite nicht gelöscht werden!
     model = Chemical
@@ -86,22 +86,26 @@ class ChemicalListView(ListView):
 
     def get_queryset(self):
 
-        # TODO Was passiert hier? Ersetzt durch jquery?!
-        if 'pk' in self.kwargs:
-            self.extra_context['chemical_detail'] = Chemical.objects.filter(pk=self.kwargs['pk']).first()
-        else:
-            self.extra_context['chemical_detail'] = None
-
         object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
 
 
         parameter = self.request.GET.getlist('p')
         # TODO add extra parameters
         # Check Workgroups:
+
+        extra_parameter = {}
+
+        if 'only stocked' in parameter:
+            parameter.remove('only stocked')
+            extra_parameter['only_stocked'] = True
+
         for param in parameter:
             curr_workgroup = Workgroup.objects.get(name=param)
             object_list = object_list | Chemical.objects.filter(
                 stock__storage__workgroup=curr_workgroup, workgroup=curr_workgroup).exclude(secret=True)
+
+        if extra_parameter.get('only_stocked'):
+            object_list = object_list.annotate(count_st=Count('stock')).filter(count_st__gt=0)
 
         query = self.request.GET.get('q')
         if query:
@@ -111,8 +115,9 @@ class ChemicalListView(ListView):
         return object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
 
     def get_context_data(self, **kwargs):
+        parameter_form = SearchParameterForm()
         kwargs.update({
-            'parameter_form': SearchParameterForm,
+            'parameter_form': parameter_form,
         })
         return super(ChemicalListView, self).get_context_data(**kwargs)
 

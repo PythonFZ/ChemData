@@ -3,30 +3,35 @@
 {#{% load crispy_forms_tags %}#}
 {% block search_bar %}
     <div class="row">
-        <div class="col-sm-8">
-            <form>
+            <div class="col-sm-8">
+                <form>
                 <div class="md-form input-group">
                     <input type="text" class="form-control" placeholder="Search Chemicals" aria-label="Search Chemicals"
-                           aria-describedby="MaterialButton-addon2" name="q" value="{{ request.GET.q }}" style="font-size: 150%">
+                           aria-describedby="MaterialButton-addon2" name="q" value="{{ request.GET.q }}"
+                           style="font-size: 150%">
                     <div class="input-group-append">
                         <button class="btn btn-lg btn-success m-0" type="submit" id="MaterialButton-addon2"
-                                value="Search Chemicals" onclick="clear_local_storage()">Search</button>
-                        <button class="btn btn-btn-lg btn-success m-0 dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                value="Search Chemicals" onclick="clear_local_storage()">Search
+                        </button>
+                        <button class="btn btn-btn-lg btn-success m-0 dropdown-toggle dropdown-toggle-split"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                         <div class="dropdown-menu">
-                            <a href="{% url 'chemmanager-home' %}" class="dropdown-item" onclick="clear_local_storage()">
+                            <a href="{% url 'chemmanager-home' %}" class="dropdown-item"
+                               onclick="clear_local_storage()">
                                 <i class="fas fa-undo"></i>&nbsp;Reset</a>
                             <a href="{% url 'chemical-create' %}" class="dropdown-item" onclick="clear_local_storage()">
                                 <i class="fas fa-plus"></i>&nbsp;Add Chemical</a>
+                            <a href="{% url 'storage-list' %}" class="dropdown-item" onclick="clear_local_storage()">
+                                <i class="fas fa-archive"></i>&nbsp;Manage Storage</a>
                         </div>
                     </div>
                 </div>
-        </div>
-        <div class="col-sm-4" style="padding-top: 25px; font-size: 100%">
-            {{ parameter_form }}
-            {{ parameter_form.media }}
-        </div>
-                </form>
-
+            </div>
+            <div class="col-sm-4">
+                {{ parameter_form }}
+                {{ parameter_form.media }}
+            </div>
+        </form>
     </div>
 
 {% endblock %}
@@ -114,17 +119,17 @@
                                                 {% if stock.distributor %}
                                                     <th> {{ stock.distributor }}</th>
                                                 {% else %}
-                                                    <th>-</th>
+                                                    <th class="text-center">-</th>
                                                 {% endif %}
                                                 {% if stock.storage %}
                                                     <th>{{ stock.storage.location_name }}</th>
                                                 {% else %}
-                                                    <th>-</th>
+                                                    <th class="text-center">-</th>
                                                 {% endif %}
                                                 {% if stock.label %}
                                                     <th>{{ stock.label }}</th>
                                                 {% else %}
-                                                    <th>-</th>
+                                                    <th class="text-center">-</th>
                                                 {% endif %}
                                                 <th>{{ stock.extraction_set.first.date_created|date:"d.m.Y" }}</th>
                                             {% endif %}
@@ -211,24 +216,24 @@
 {% endblock content %}
 
 {% block properties %}
-{#    <p style="padding-bottom: 80px"></p>#}
-{#    <div class="card mb-4">#}
-{#    <div class="card-body">#}
-{#        <div class="btn-toolbar" role="toolbar">#}
-{#            {% if request.user_agent.is_mobile %}#}
-{#                <div class="btn-group mr-1 btn-group-sm" role="group">#}
-{#            {% else %}#}
-{#                <div class="btn-group mr-1" role="group">#}
-{#            {% endif %}#}
-{#            <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical#}
-{#            </a>#}
-{#            </div>#}
-{#            <div class="btn-group mr-1" role="group">#}
-{#                <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>#}
-{#            </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
+    {#    <p style="padding-bottom: 80px"></p>#}
+    {#    <div class="card mb-4">#}
+    {#    <div class="card-body">#}
+    {#        <div class="btn-toolbar" role="toolbar">#}
+    {#            {% if request.user_agent.is_mobile %}#}
+    {#                <div class="btn-group mr-1 btn-group-sm" role="group">#}
+    {#            {% else %}#}
+    {#                <div class="btn-group mr-1" role="group">#}
+    {#            {% endif %}#}
+    {#            <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical#}
+    {#            </a>#}
+    {#            </div>#}
+    {#            <div class="btn-group mr-1" role="group">#}
+    {#                <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>#}
+    {#            </div>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </div>#}
 
     <div id="chemical_detail_div"></div>
 
@@ -237,8 +242,8 @@
 {% block custom_js %}
 
     <!-- Select2 -->
-{#    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />#}
-{#    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>#}
+    {#    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />#}
+    {#    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>#}
 
     <script>
         $('.expand-chemical').click(function () {
@@ -297,26 +302,27 @@
         $(function () {
             $('.chemical-item').css('cursor', 'pointer')
 
-                {#.hover(function () {#}
-                {#    var id = $(this).attr("id").split("list-item-")[1];#}
-                {#    var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())#}
-                {#    $('#chemical_detail_div').load(url, function () {#}
-                {#        MathJax.typeset()#}
-                {#    });#}
-                {#})#}
+            {#.hover(function () {#}
+            {#    var id = $(this).attr("id").split("list-item-")[1];#}
+            {#    var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())#}
+            {#    $('#chemical_detail_div').load(url, function () {#}
+            {#        MathJax.typeset()#}
+            {#    });#}
+            {#})#}
 
-                .click(function () {
-                    var id = $(this).attr("id").split("list-item-")[1];
-                    $('#collapseAll-' + id).collapse('toggle');
+            .click(function () {
+                var id = $(this).attr("id").split("list-item-")[1];
+                $('#collapseAll-' + id).collapse('toggle');
 
-                    if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
-                        {#clear_local_storage();#}
-                        localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
-                    } else {
-                        localStorage.removeItem('open_' + 'collapseAll-' + id);
-                    }
-                });
-        });
+                if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
+                    {#clear_local_storage();#}
+                    localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
+                } else {
+                    localStorage.removeItem('open_' + 'collapseAll-' + id);
+                }
+            });
+        })
+        ;
 
     </script>
 {% endblock %}
