@@ -121,7 +121,6 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
         return super(ChemicalListView, self).get_context_data(**kwargs)
 
     def get_ajax(self, request, *args, **kwargs):
-        # print(request.GET.get('q'))
         queryset = self.get_queryset()
         name_list = []
         for query_object in queryset.all():
