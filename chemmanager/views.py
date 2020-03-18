@@ -8,6 +8,7 @@ from dal import autocomplete
 from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm
 from .utils import PubChemLoader, unit_converter
+from braces import views
 
 
 class ChemicalDetailView(LoginRequiredMixin, DetailView):
@@ -73,7 +74,7 @@ class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return HttpResponseRedirect(reverse_lazy('chemmanager-home'))
 
 
-class ChemicalListView(LoginRequiredMixin, ListView):
+class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRequiredMixin, ListView):
     # TODO user passes test!
     # TODO Search-parameter sollten beim neuladen der Seite nicht gelöscht werden!
     model = Chemical
@@ -85,9 +86,7 @@ class ChemicalListView(LoginRequiredMixin, ListView):
     }
 
     def get_queryset(self):
-
         object_list = Chemical.objects.filter(workgroup=self.request.user.profile.workgroup)
-
 
         parameter = self.request.GET.getlist('p')
         # TODO add extra parameters
@@ -120,6 +119,15 @@ class ChemicalListView(LoginRequiredMixin, ListView):
             'parameter_form': parameter_form,
         })
         return super(ChemicalListView, self).get_context_data(**kwargs)
+
+    def get_ajax(self, request, *args, **kwargs):
+        # print(request.GET.get('q'))
+        queryset = self.get_queryset()
+        name_list = []
+        for query_object in queryset.all():
+            name_list.append(query_object.name)
+        response = {'names': name_list}
+        return self.render_json_response(response)
 
     # paginate_by = 6
 

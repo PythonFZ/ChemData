@@ -3,12 +3,16 @@
 {#{% load crispy_forms_tags %}#}
 {% block search_bar %}
     <div class="row">
-            <div class="col-sm-8">
-                <form>
+        <div class="col-sm-8">
+            <form id="chemical-search-form">
                 <div class="md-form input-group">
                     <input type="text" class="form-control" placeholder="Search Chemicals" aria-label="Search Chemicals"
                            aria-describedby="MaterialButton-addon2" name="q" value="{{ request.GET.q }}"
-                           style="font-size: 150%">
+                           style="font-size: 150%" id="chemical-search-input" autocomplete="off" data-toggle="dropdown">
+
+                    <div class="dropdown-menu" aria-labelledby="search-autocomplete-dropdown"
+                         id="search-autocomplete-dropdown"></div>
+
                     <div class="input-group-append">
                         <button class="btn btn-lg btn-success m-0" type="submit" id="MaterialButton-addon2"
                                 value="Search Chemicals" onclick="clear_local_storage()">Search
@@ -26,11 +30,11 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-4">
-                {{ parameter_form }}
-                {{ parameter_form.media }}
-            </div>
+        </div>
+        <div class="col-sm-4">
+            {{ parameter_form }}
+            {{ parameter_form.media }}
+        </div>
         </form>
     </div>
 
@@ -151,6 +155,7 @@
                                                 <th></th>
                                                 <th></th>
                                                 <th></th>
+                                                <th></th>
                                             {% endif %}
                                         </tr>
                                     {% endif %}
@@ -253,11 +258,40 @@
     </script>
     <script>
         $(document).ready(function () {
+
+            $(document).on("click", ".search-suggestion", function () {
+                $('#chemical-search-input').val(this.text);
+                $('#chemical-search-form').submit();
+                console.log(this);
+            });
+
             $('.chemical-search-parameter').select2({
                 placeholder: 'Choose additional Search-Parameter',
                 allowClear: true
             });
+
             $('[data-toggle="tooltip"]').tooltip();
+
+            $("#chemical-search-input").keyup(function () {
+                var search = $(this).val();
+                if (search !== "") {
+                    $.ajax({
+                        url: "{% url 'chemmanager-home' %}",
+                        type: 'GET',
+                        data: {q: search},
+                        dataType: 'json',
+                        success: function (response) {
+                            $("#search-autocomplete-dropdown").empty();
+                            response['names'].forEach(function (item, index) {
+                                {#console.log(item, index);#}
+                                $("#search-autocomplete-dropdown").append("<a class='dropdown-item search-suggestion' href='#'>" + item + "</a>");
+                                {#$("#search-autocomplete-dropdown").show();#}
+                            })
+                        }
+                    })
+                }
+            });
+
             var collapse_elements = $('.collapse');
             collapse_elements.each(function () {
                 // Default close unless saved as open
@@ -271,6 +305,8 @@
             });
         });
     </script>
+
+
     <script>
         function clear_local_storage() {
             var open_elements = [];
@@ -302,25 +338,17 @@
         $(function () {
             $('.chemical-item').css('cursor', 'pointer')
 
-            {#.hover(function () {#}
-            {#    var id = $(this).attr("id").split("list-item-")[1];#}
-            {#    var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())#}
-            {#    $('#chemical_detail_div').load(url, function () {#}
-            {#        MathJax.typeset()#}
-            {#    });#}
-            {#})#}
+                .click(function () {
+                    var id = $(this).attr("id").split("list-item-")[1];
+                    $('#collapseAll-' + id).collapse('toggle');
 
-            .click(function () {
-                var id = $(this).attr("id").split("list-item-")[1];
-                $('#collapseAll-' + id).collapse('toggle');
-
-                if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
-                    {#clear_local_storage();#}
-                    localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
-                } else {
-                    localStorage.removeItem('open_' + 'collapseAll-' + id);
-                }
-            });
+                    if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
+                        {#clear_local_storage();#}
+                        localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
+                    } else {
+                        localStorage.removeItem('open_' + 'collapseAll-' + id);
+                    }
+                });
         })
         ;
 
