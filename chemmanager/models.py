@@ -5,7 +5,44 @@ from django.urls import reverse
 from users.models import Workgroup
 from treebeard.mp_tree import MP_Node
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from PIL import Image
+
+# soft delete: https://blog.usebutton.com/cascading-soft-deletion-in-django
+
+# Own classes to inherit from:
+
+
+class SoftDeleteManager(models.Manager):
+    def __init__(self, *args, **kwargs):
+        self.with_deleted = kwargs.pop('deleted', False)
+        super(SoftDeleteManager, self).__init__(*args, **kwargs)
+
+    def _base_queryset(self):
+        return super().get_queryset()
+
+    def get_queryset(self):
+        qs = self._base_queryset()
+        if self.with_deleted:
+            return qs
+        return qs.filter(deleted_at=None)
+
+
+class SoftDeleteModel(models.Model):
+    objects = SoftDeleteManager()
+    objects_with_deleted = SoftDeleteManager(deleted=True)
+
+    deleted_at = models.DateTimeField(null=True)
+
+    def delete(self, using=None, keep_parents=False):
+        self.deleted_at = timezone.now()
+        self.save()
+
+    def restore(self):
+        self.deleted_at = None
+        self.save()
+
+#
 
 
 class Distributor(models.Model):
@@ -119,7 +156,7 @@ class Storage(MP_Node):
             return mark_safe(str)
 
 
-class Stock(models.Model):
+class Stock(SoftDeleteModel):
 
     name = models.CharField(max_length=250)
 

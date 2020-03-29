@@ -1,0 +1,4 @@
+/chemmanager/migrations/
+/blog/migrations/
+/users/migrations/
+/db.sqlite3
