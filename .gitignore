@@ -1,5 +1,8 @@
 /.idea/
+!/chemmanager/migrations/__init__.py
 /chemmanager/migrations/
+!/blog/migrations/__init__.py
 /blog/migrations/
+!/users/migrations/__init__.py
 /users/migrations/
 /db.sqlite3
