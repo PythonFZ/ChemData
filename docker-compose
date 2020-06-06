@@ -13,6 +13,22 @@ services:
     depends_on:
       - chemdata_db
 
+  letsencrypt:
+    image: linuxserver/letsencrypt
+    restart: always
+    environment:
+      - TZ=Europe/Berlin
+      - URL=xxxx
+      - SUBDOMAINS=eln
+      - VALIDATION=http
+      - EMAIL=xxxx
+    volumes:
+      - ./letsencrypt:/config
+    ports:
+      - 443:443
+      - 80:80
+
+
 # networks:
 #   default:
 #     external:
