@@ -9,7 +9,7 @@ Install
 - conda activate ChemData
 
 **Install requirements via pip**
-(look for requirements.txt, e.g. pip install django)
+(look for requirements.txt or install everything at once: pip install -r requirements.txt)
 
 - python manage.py runserver
 (python manage.py runserver 0.0.0.0:80 to run on localhost/ + edit settings.py for mobile testing)
