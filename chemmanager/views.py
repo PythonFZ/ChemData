@@ -76,7 +76,7 @@ class StockCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRequiredMixin, ListView):
     # TODO user passes test!
-    # TODO Search-parameter sollten beim neuladen der Seite nicht gelöscht werden!
+    # TODO Search-parameter should not be reset on page reload!
     model = Chemical
     template_name = 'chemmanager/home.html'
     context_object_name = 'chemicals'
@@ -111,7 +111,8 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
             object_list = object_list.filter(name__icontains=query) | object_list.filter(cas__startswith=query)
 
         # Sort by most available / largest stock count and than by name!
-        return object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
+        object_list = object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
+        return object_list
 
     def get_context_data(self, **kwargs):
         parameter_form = SearchParameterForm()
@@ -137,6 +138,7 @@ class ChemicalCreateView(CreateView):
     extra_context = {
         'title': 'Add'
     }
+    chemical_name = None
 
     def form_valid(self, form, **kwargs):
         """Load Data from PubChem if button is pressed"""
@@ -167,6 +169,8 @@ class ChemicalCreateView(CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
+        # Add Chemical Name from Search to create Chemical faster.
+        form['name'].initial = self.kwargs.get('chemical_name')
         return form
 
 
