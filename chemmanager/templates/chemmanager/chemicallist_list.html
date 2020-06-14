@@ -1,0 +1,30 @@
+{% extends "chemmanager/chemmanager_base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container">
+        <h2>File list</h2>
+        <table class="'table">
+            <thead>
+            <tr>
+                <th>Workgroup</th>
+                <th>CSV</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for line in frame.data %}
+
+                <tr>
+
+                 {% for item in line %}
+                    <td>{{ item }}</td>
+                {% endfor %}
+
+                </tr>
+
+
+
+            {% endfor %}
+            </tbody>
+        </table>
+
+{% endblock %}

@@ -42,7 +42,7 @@ class SoftDeleteModel(models.Model):
         self.deleted_at = None
         self.save()
 
-#
+
 
 
 class Distributor(models.Model):
@@ -231,5 +231,16 @@ class Extraction(models.Model):
 
     class Meta:
         ordering = ['-date_created']
+
+
+class ChemicalList(models.Model):
+
+    workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, blank=True, null=True)
+    file = models.FileField(upload_to='csv')
+
+
+
+
+
 
 

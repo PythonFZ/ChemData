@@ -1,6 +1,6 @@
 from django import forms
 from dal import autocomplete
-from .models import Chemical, Stock, Extraction, Storage
+from .models import Chemical, Stock, Extraction, Storage, ChemicalList
 
 
 class SearchParameterForm(forms.Form):
@@ -65,10 +65,10 @@ class StockUpdateForm(forms.ModelForm):
         model = Stock
         fields = ('name', 'distributor', 'quantity', 'unit', 'comment', 'storage', 'label')
         widgets = {
-            # 'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aaldrich'}),
+            # 'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aldrich'}),
             'distributor': autocomplete.ModelSelect2(
                 url='distributor-autocomplete',
-                attrs={'data-placeholder': 'e.g. Sigma Aaldrich'}),
+                attrs={'data-placeholder': 'e.g. Sigma Aldrich'}),
         }
 
 
@@ -85,3 +85,9 @@ class ExtractionCreateForm(forms.ModelForm):
             'comment': forms.Textarea(attrs={'rows': 4}),
             'label': forms.TextInput(attrs={'placeholder': 'Name'}),
         }
+
+
+class ChemicalListUploadForm(forms.ModelForm):
+    class Meta:
+        model = ChemicalList
+        fields = ('file',)

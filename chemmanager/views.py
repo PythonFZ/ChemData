@@ -5,10 +5,13 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Count
 from dal import autocomplete
-from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup
-from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm
+from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList
+from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm, \
+    ChemicalListUploadForm
 from .utils import PubChemLoader, unit_converter
 from braces import views
+from django.shortcuts import redirect
+import pandas as pd
 
 
 class ChemicalDetailView(LoginRequiredMixin, DetailView):
@@ -444,3 +447,42 @@ class StorageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         messages.add_message(self.request, messages.WARNING, 'You are not permitted to apply changes! '
                                                              'Please contact your group admin.')
         return HttpResponseRedirect(reverse_lazy('storage-list'))
+
+
+class ChemicalListUploadView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Uploads chemical-list and checks if it's csv"""
+    model = ChemicalList
+    success_url = reverse_lazy('chemmanager-home')
+    form_class = ChemicalListUploadForm
+
+    def test_func(self):
+        return True
+
+    def form_valid(self, form, **kwargs):
+        if str(form.instance.file).endswith('.csv'):
+            form.instance.workgroup = self.request.user.profile.workgroup
+            object = form.save()
+            return redirect('chemicallist-verify', object.id)
+            # return super().form_valid(form)
+        else:
+            messages.add_message(self.request, messages.WARNING, 'This is not a csv file!')
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+
+class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = ChemicalList
+
+    def test_func(self):
+        return True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
+
+        frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
+        context['frame'] = frame.to_dict('split')
+
+        return context
+
+

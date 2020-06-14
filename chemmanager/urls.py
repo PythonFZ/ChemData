@@ -15,12 +15,17 @@ from .views import (
     StorageUpdateView,
     DistributorAutocomplete,
     SearchParameterAutocomplete,
+    ChemicalListUploadView,
+    ChemicalListVerifyView,
 )
+
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     path('', login_required(ChemicalListView.as_view()), name='chemmanager-home'),
     path('<int:pk>/', ChemicalListView.as_view(), name='chemical-list'),
+    path('upload/chemicallist/<int:pk>/verify/', ChemicalListVerifyView.as_view(), name='chemicallist-verify'),
+    path('upload/chemicallist/', ChemicalListUploadView.as_view(), name="chemicallist-upload"),
     path('chemical/<int:pk>/update', ChemicalUpdateView.as_view(), name='chemical-update'),
     path('chemical/new/', login_required(ChemicalCreateView.as_view()), name='chemical-create'),
     path('chemical/new/<chemical_name>/', login_required(ChemicalCreateView.as_view()),
