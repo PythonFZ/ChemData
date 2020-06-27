@@ -22,7 +22,6 @@ class StorageCreateForm(forms.ModelForm):
 
 
 class ChemicalCreateForm(forms.ModelForm):
-
     class Meta:
         model = Chemical
         fields = ('name', 'structure', 'molar_mass', 'density', 'melting_point', 'boiling_point',
@@ -63,7 +62,7 @@ class StockUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Stock
-        fields = ('name', 'distributor', 'quantity', 'unit', 'comment', 'storage', 'label')
+        fields = ('distributor', 'quantity', 'unit', 'purity', 'comment', 'storage', 'label')
         widgets = {
             # 'distributor': forms.TextInput(attrs={'placeholder': 'e.g. Sigma Aldrich'}),
             'distributor': autocomplete.ModelSelect2(
@@ -76,7 +75,6 @@ class ExtractionCreateForm(forms.ModelForm):
     anonymous = forms.BooleanField(required=False, label='stay anonymous')
 
     class Meta:
-
         model = Extraction
         fields = ('quantity', 'unit', 'comment', 'date_created')
         # TODO Placeholder!
@@ -91,3 +89,27 @@ class ChemicalListUploadForm(forms.ModelForm):
     class Meta:
         model = ChemicalList
         fields = ('file',)
+
+
+class ChemicalListVerifyForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        n_columns = kwargs.pop('n_columns')
+        super(ChemicalListVerifyForm, self).__init__(*args, **kwargs)
+        # choices = [(f.name, f.name) for f in Stock._meta.get_fields()]
+        # choices.append(('--', 'empty'))
+        required_fields = [f.name for f in Stock._meta.get_fields() if not getattr(f, 'blank', False) is True]
+
+        choices = [('', '--')] + [(f.name, f.name) for f in Stock._meta.get_fields()]
+        choices = [x for x in choices if x not in (('id', 'id'), ('softdeletemodel_ptr', 'softdeletemodel_ptr'))]
+
+        choices = [f if f[1] not in required_fields else (f[0], f[1]+'*') for f in choices]
+        #makes new list without id, softdelete_pzt etc.
+        #TODO filter choices (no id), capitalize,default option
+        #TODO Required choices marked with 'star'
+        #creates list from Stock names, similiar to: for f in Stock.__... : choices.append((f.name, f.name))
+        for i, label in enumerate(n_columns):
+
+            self.fields[i] = forms.ChoiceField(label=label, choices=choices, required=False)
+
+

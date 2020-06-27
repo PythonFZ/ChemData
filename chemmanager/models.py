@@ -158,11 +158,12 @@ class Storage(MP_Node):
 
 class Stock(SoftDeleteModel):
 
-    name = models.CharField(max_length=250)
+    # name = models.CharField(max_length=250)
 
     distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE, blank=True, null=True)
     price = models.FloatField(blank=True, null=True)
     quantity = models.FloatField()
+    purity = models.CharField(max_length=20, blank=True, null=True)
     comment = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(default=timezone.now)
     date_changed = models.DateTimeField(auto_now=True)
@@ -237,6 +238,7 @@ class ChemicalList(models.Model):
 
     workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, blank=True, null=True)
     file = models.FileField(upload_to='csv')
+
 
 
 

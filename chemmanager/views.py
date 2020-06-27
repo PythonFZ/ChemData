@@ -7,7 +7,7 @@ from django.db.models import Count
 from dal import autocomplete
 from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm, \
-    ChemicalListUploadForm
+    ChemicalListUploadForm, ChemicalListVerifyForm
 from .utils import PubChemLoader, unit_converter
 from braces import views
 from django.shortcuts import redirect
@@ -81,6 +81,7 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
     # TODO user passes test!
     # TODO Search-parameter should not be reset on page reload!
     model = Chemical
+    paginate_by =  50
     template_name = 'chemmanager/home.html'
     context_object_name = 'chemicals'
     extra_context = {
@@ -470,19 +471,108 @@ class ChemicalListUploadView(LoginRequiredMixin, UserPassesTestMixin, CreateView
             return self.render_to_response(context)
 
 
+# class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+#     model = ChemicalList
+#
+#     def test_func(self):
+#         return True
+#
+#     def get_context_data(self, **kwargs):
+#         '''gets data from uplaoded csv-file and prints out its data'''
+#         context = super().get_context_data(**kwargs)
+#         my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
+#
+#         frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
+#         context['frame'] = frame.to_dict('split')
+# #TODO delete or die
+#         # for index,row in frame.iterrows():
+#         #     print(row['Substance'])
+#         #     chemical = Chemical(name=row['Substance'])
+#         #     chemical.creator = self.request.user
+#         #     chemical.workgroup = self.request.user.profile.workgroup
+#         #
+#         #     chemical.save()
+#         #     stock = Stock(name='Standard')
+#         #     stock.chemical = chemical
+#         #     #stock.cas = row['cas']
+#         #     stock.comment = row['Additional Information']
+#         #     #stock.distributor = row['Distributor']
+#         #     #stock.unit = row['unit']
+#         #     stock.Storage = row['Location']
+#         #     stock.label = row['Number']
+#         #     stock.save
+#         return context
+
 class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+
+    template_name = 'chemmanager/chemicallist_list.html'
     model = ChemicalList
 
     def test_func(self):
         return True
 
     def get_context_data(self, **kwargs):
+        '''gets data from uplaoded csv-file and prints out its data'''
         context = super().get_context_data(**kwargs)
         my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
 
+
         frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
         context['frame'] = frame.to_dict('split')
-
+        context['form'] = ChemicalListVerifyForm(n_columns=frame.columns)
         return context
 
+    def post(self, request, *args, **kwargs):
+        '''!!!Saves into database!!!!'''
+        #request.POST dictionary of chosen data (e.g. '0':'Storage')
+        col_dict = {}
+        for k, v in request.POST.items():
+            try:
+                col_dict[v] = int(k)
+            except ValueError:
+                pass
+        required_fields = [f.name for f in Stock._meta.get_fields() if not getattr(f, 'blank', False) is True]
+        required_fields = [f for f in required_fields if f not in ('id', 'softdeletemodel_ptr')] #f =field
+        print(required_fields)
+        missing_fields = []
+        for element in required_fields:
+            if element not in col_dict:
+                missing_fields.append(element)
 
+
+
+        if len(missing_fields) > 0:
+            messages.add_message(self.request, messages.WARNING, f'Add all required data! * missing {missing_fields} ')
+            # TODO keep forms filled
+            return self.get(request, args, kwargs)
+
+        my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
+        choices = [f.name for f in Stock._meta.get_fields()]
+        frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
+        # col_dict = {v: int(k) for k, v in request.POST.items()} #inverts e.g. 1: chemical -> chemical: 1
+
+
+
+        for index,row in frame.iterrows():
+             print(row[col_dict.get('chemical')])
+        #     chemical = Chemical(name=row['Substance'])
+        #     chemical.creator = self.request.user
+        #     chemical.workgroup = self.request.user.profile.workgroup
+        #
+        #     chemical.save()
+        #     stock = Stock(name='Standard')
+        #     stock.chemical = chemical
+        #     #stock.cas = row['cas']
+        #     stock.comment = row['Additional Information']
+        #     #stock.distributor = row['Distributor']
+        #     #stock.unit = row['unit']
+        #     stock.Storage = row['Location']
+        #     stock.label = row['Number']
+        #     stock.save
+        #
+        # for key in request.POST:
+        #     if request.POST[key] in choices:
+        #         print(f'stock.{request.POST[key]}')
+        #         print(key)
+
+        return self.get(request, *args, **kwargs)
