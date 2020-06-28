@@ -552,6 +552,9 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             #                                                       'workgroup': self.request.user.profile.workgroup})
             # if created:
             #     print(created)
+
+            #creates chemical if not present, checks only name!
+            #TODO add stock for same chemical in list
             Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
                                                  defaults={'creator': self.request.user,
                                                            'workgroup': self.request.user.profile.workgroup})
