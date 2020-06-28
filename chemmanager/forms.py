@@ -94,7 +94,7 @@ class ChemicalListUploadForm(forms.ModelForm):
 class ChemicalListVerifyForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-        n_columns = kwargs.pop('n_columns')
+        columns = kwargs.pop('columns')
         super(ChemicalListVerifyForm, self).__init__(*args, **kwargs)
         # choices = [(f.name, f.name) for f in Stock._meta.get_fields()]
         # choices.append(('--', 'empty'))
@@ -108,7 +108,7 @@ class ChemicalListVerifyForm(forms.Form):
         #TODO filter choices (no id), capitalize,default option
         #TODO Required choices marked with 'star'
         #creates list from Stock names, similiar to: for f in Stock.__... : choices.append((f.name, f.name))
-        for i, label in enumerate(n_columns):
+        for i, label in enumerate(columns):
 
             self.fields[i] = forms.ChoiceField(label=label, choices=choices, required=False)
 

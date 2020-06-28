@@ -81,7 +81,7 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
     # TODO user passes test!
     # TODO Search-parameter should not be reset on page reload!
     model = Chemical
-    paginate_by =  50
+    paginate_by = 50
     template_name = 'chemmanager/home.html'
     context_object_name = 'chemicals'
     extra_context = {
@@ -504,7 +504,6 @@ class ChemicalListUploadView(LoginRequiredMixin, UserPassesTestMixin, CreateView
 #         return context
 
 class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-
     template_name = 'chemmanager/chemicallist_list.html'
     model = ChemicalList
 
@@ -516,15 +515,14 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
 
-
         frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
         context['frame'] = frame.to_dict('split')
-        context['form'] = ChemicalListVerifyForm(n_columns=frame.columns)
+        context['form'] = ChemicalListVerifyForm(columns=frame.columns)
         return context
 
     def post(self, request, *args, **kwargs):
         '''!!!Saves into database!!!!'''
-        #request.POST dictionary of chosen data (e.g. '0':'Storage')
+        # request.POST dictionary of chosen data (e.g. '0':'Storage')
         col_dict = {}
         for k, v in request.POST.items():
             try:
@@ -532,14 +530,12 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             except ValueError:
                 pass
         required_fields = [f.name for f in Stock._meta.get_fields() if not getattr(f, 'blank', False) is True]
-        required_fields = [f for f in required_fields if f not in ('id', 'softdeletemodel_ptr')] #f =field
+        required_fields = [f for f in required_fields if f not in ('id', 'softdeletemodel_ptr')]  # f =field
         print(required_fields)
         missing_fields = []
         for element in required_fields:
             if element not in col_dict:
                 missing_fields.append(element)
-
-
 
         if len(missing_fields) > 0:
             messages.add_message(self.request, messages.WARNING, f'Add all required data! * missing {missing_fields} ')
@@ -547,17 +543,27 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             return self.get(request, args, kwargs)
 
         my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
-        choices = [f.name for f in Stock._meta.get_fields()]
         frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
         # col_dict = {v: int(k) for k, v in request.POST.items()} #inverts e.g. 1: chemical -> chemical: 1
 
+        for index, row in frame.iterrows():
+            # chemical, created = Chemical.objects.get_or_create(name=Chemical(row[col_dict.get('chemical')]),
+            #                                                    defaults={'creator': self.request.user,
+            #                                                       'workgroup': self.request.user.profile.workgroup})
+            # if created:
+            #     print(created)
+            Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
+                                                 defaults={'creator': self.request.user,
+                                                           'workgroup': self.request.user.profile.workgroup})
 
+            # chemical = Chemical(name=row[col_dict.get('chemical')], creator=self.request.user,
+            #                     workgroup=self.request.user.profile.workgroup)
+            # chemical.save()
 
-        for index,row in frame.iterrows():
-             print(row[col_dict.get('chemical')])
-        #     chemical = Chemical(name=row['Substance'])
-        #     chemical.creator = self.request.user
-        #     chemical.workgroup = self.request.user.profile.workgroup
+            # chemical = Chemical(name=row[col_dict.get('chemical')])
+            # chemical = Chemical(name=row['Substance'])
+            # chemical.creator = self.request.user
+            # chemical.workgroup = self.request.user.profile.workgroup
         #
         #     chemical.save()
         #     stock = Stock(name='Standard')
