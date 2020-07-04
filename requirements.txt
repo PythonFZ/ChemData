@@ -10,3 +10,4 @@ django-treebeard
 django-static-fontawesome
 django-autocomplete-light
 django-braces
+pandas
