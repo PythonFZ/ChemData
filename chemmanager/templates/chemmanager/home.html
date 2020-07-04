@@ -47,7 +47,9 @@
             <i class="fa fa-flask fa-5x" style="color: rgba(0,0,0,0.4)"></i>
             <br>
             <h5>Wow, such empty!</h5>
-            <a href="{% url 'chemical-create-by-name' request.GET.q %}" class="btn btn-info">Create {{ request.GET.q }}</a>
+            {% if request.GET.q %}
+                <a href="{% url 'chemical-create-by-name' request.GET.q %}" class="btn btn-info">Create {{ request.GET.q }}</a>
+            {% endif %}
         </div>
     {% endif %}
     <div class="media mb-3">
