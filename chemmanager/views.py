@@ -137,6 +137,10 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
     # paginate_by = 6
 
 
+class ChemicalTableView(ChemicalListView):
+    template_name = 'chemmanager/chemicaltable_list.html'
+
+
 class ChemicalCreateView(CreateView):
     model = Chemical
     form_class = ChemicalCreateForm

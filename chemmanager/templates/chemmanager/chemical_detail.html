@@ -1,9 +1,9 @@
-<div class="card">
+<div class="card position-fixed">
     <div class="card-header h4">
         <div class="d-flex justify-content-between">
             {{ object.name }}
             {% if request.user in object.allowed_edit %}
-                <a href="{% url 'chemical-update' object.id %}"><i class="fa fa-edit" style="color: black"></i></a>
+                <a href="{% url 'chemical-update' object.id %}">&nbsp;<i class="fa fa-edit" style="color: #000000"></i></a>
             {% endif %}
         </div>
     </div>

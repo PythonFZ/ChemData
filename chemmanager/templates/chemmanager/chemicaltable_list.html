@@ -1,0 +1,24 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block base_content %}
+<main role="main" class="container">
+    <table class="table table-striped table-sm table-light table-hover" style="width: 50%">
+        <thead>
+        <tr>
+            <th scope="col"> Name</th>
+            <th>Molar Mass</th>
+        </tr>
+        </thead>
+        <tbody>
+{#  TODO STOCK instead of chemicals!      #}
+        {% for chemical in chemicals %}
+            <tr>
+                <td><a href="{% url 'chemical-update' chemical.id %}">{{ chemical.name }}</a></td>
+                <td>{{ chemical.molar_mass }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</main>
+{% endblock base_content %}
