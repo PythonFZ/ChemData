@@ -1,10 +1,11 @@
 {% extends "chemmanager/chemmanager_base.html" %}
 {% load static %}
 {#{% load crispy_forms_tags %}#}
+
 {% block search_bar %}
-    <div class="row">
-        <div class="col-sm-8">
-            <form id="chemical-search-form">
+    <form id="chemical-search-form">
+        <div class="row">
+            <div class="col-sm-8">
                 <div class="md-form input-group">
                     <input type="text" class="form-control" placeholder="Search Chemicals" aria-label="Search Chemicals"
                            aria-describedby="MaterialButton-addon2" name="q" value="{{ request.GET.q }}"
@@ -30,13 +31,14 @@
                         </div>
                     </div>
                 </div>
+
+            </div>
+            <div class="col-sm-4">
+                {{ parameter_form }}
+                {{ parameter_form.media }}
+            </div>
         </div>
-        <div class="col-sm-4">
-            {{ parameter_form }}
-            {{ parameter_form.media }}
-        </div>
-        </form>
-    </div>
+    </form>
 
 {% endblock %}
 {% block content %}
@@ -225,28 +227,9 @@
 {% endblock content %}
 
 {% block properties %}
-    {#    <p style="padding-bottom: 80px"></p>#}
-    {#    <div class="card mb-4">#}
-    {#    <div class="card-body">#}
-    {#        <div class="btn-toolbar" role="toolbar">#}
-    {#            {% if request.user_agent.is_mobile %}#}
-    {#                <div class="btn-group mr-1 btn-group-sm" role="group">#}
-    {#            {% else %}#}
-    {#                <div class="btn-group mr-1" role="group">#}
-    {#            {% endif %}#}
-    {#            <a href="{% url 'chemical-create' %}" class="btn btn-info"><i class="fa fa-plus-circle"></i> Chemical#}
-    {#            </a>#}
-    {#            </div>#}
-    {#            <div class="btn-group mr-1" role="group">#}
-    {#                <a href="{% url 'storage-list' %}" class="btn btn-info"><i class="fa fa-edit"></i> Storage</a>#}
-    {#            </div>#}
-    {#            </div>#}
-    {#        </div>#}
-    {#    </div>#}
-
     <div id="chemical_detail_div"></div>
-
 {% endblock properties %}
+
 
 {% block custom_js %}
 
