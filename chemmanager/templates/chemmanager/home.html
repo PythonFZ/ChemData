@@ -48,7 +48,8 @@
             <br>
             <h5>Wow, such empty!</h5>
             {% if request.GET.q %}
-                <a href="{% url 'chemical-create-by-name' request.GET.q %}" class="btn btn-info">Create {{ request.GET.q }}</a>
+                <a href="{% url 'chemical-create-by-name' request.GET.q %}"
+                   class="btn btn-info">Create {{ request.GET.q }}</a>
             {% endif %}
         </div>
     {% endif %}
@@ -109,11 +110,11 @@
                                 </thead>
 
                                 {% for stock in chemical.stock_set.all %}
-                                    {% if request.user.profile.workgroup in stock.storage.workgroup.all or chemical.workgroup == request.user.profile.workgroup %}
+                                    {% if request.user.profile.workgroup in stock.storage.shared_workgroups.all or chemical.workgroup == request.user.profile.workgroup %}
                                         <tr>
                                             <th>
                                                 <a href="{% url 'stock-update' stock.id %}"
-                                                   class="btn btn-sm btn-outline-primary w-100">{{ stock.name }}</a>
+                                                   class="btn btn-sm btn-outline-primary w-100">EDIT</a>
                                             </th>
                                             <th>
                                                 <a href="{% url 'extraction-create' stock.id %}"

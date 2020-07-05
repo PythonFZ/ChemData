@@ -18,7 +18,7 @@ class StorageCreateForm(forms.ModelForm):
 
     class Meta:
         model = Storage
-        fields = ('name', 'room', 'workgroup', 'abbreviation')
+        fields = ('name', 'room', 'shared_workgroups', 'abbreviation')
 
 
 class ChemicalCreateForm(forms.ModelForm):
@@ -58,7 +58,7 @@ class StockUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
         super(StockUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['storage'].queryset = Storage.objects.filter(workgroup=request.user.profile.workgroup).distinct()
+        self.fields['storage'].queryset = Storage.objects.filter(owner_workgroup__exact=request.user.profile.workgroup)
 
     class Meta:
         model = Stock

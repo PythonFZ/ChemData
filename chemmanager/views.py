@@ -22,9 +22,8 @@ class ChemicalDetailView(LoginRequiredMixin, DetailView):
 class SearchParameterAutocomplete(LoginRequiredMixin, autocomplete.Select2ListView):
     def get_list(self):
         parameter_list = ['only stocked']
-        for my_storage in Storage.objects.filter(workgroup=self.request.user.profile.workgroup).all():
-            for workgroup in my_storage.workgroup.all():
-                parameter_list.append(workgroup.name)
+        for my_storage in Storage.objects.filter(shared_workgroups=self.request.user.profile.workgroup).all():
+            parameter_list.append(my_storage.owner_workgroup.name)
         return list(set(parameter_list))
 
 
@@ -104,8 +103,10 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
 
         for param in parameter:
             curr_workgroup = Workgroup.objects.get(name=param)
+            # Iterate through all search parameter, check if Storage is shared with current users workgroup!
             object_list = object_list | Chemical.objects.filter(
-                stock__storage__workgroup=curr_workgroup, workgroup=curr_workgroup).exclude(secret=True)
+                stock__storage__shared_workgroups=self.request.user.profile.workgroup,
+                workgroup=curr_workgroup).exclude(secret=True)
 
         if extra_parameter.get('only_stocked'):
             object_list = object_list.annotate(count_st=Count('stock')).filter(count_st__gt=0)
@@ -262,13 +263,13 @@ class StockDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         stock = self.get_object()
-        messages.add_message(self.request, messages.INFO, f'{stock.name} successfully removed!')
+        messages.add_message(self.request, messages.INFO, f'Stock for {stock.chemical.name} successfully removed!')
         return super().delete(request, *args, **kwargs)
 
     def test_func(self):
         """Check if User is in group and allowed to remove Stock"""
         stock = self.get_object()
-        if self.request.user.profile.workgroup in stock.storage.workgroup.all():
+        if self.request.user.profile.workgroup == stock.storage.owner_workgroup:
             return True
         else:
             return False
@@ -340,7 +341,7 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                                                      stock)) <= 0:
                 path = reverse('stock-delete', args=[stock.id])
                 messages.add_message(self.request, messages.WARNING,
-                                     f'<div class="d-flex justify-content-between align-items-center"> <div>Stock <b>{stock.name}</b> for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>',
+                                     f'<div class="d-flex justify-content-between align-items-center"> <div>Stock for <b>{stock.chemical.name}</b> seems to be empty.</div> <a class="btn btn-outline-danger" href="{path}">Remove Stock!</a> </div>',
                                      extra_tags='safe')
 
             return super().form_valid(form)
@@ -356,7 +357,7 @@ class ExtractionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         Permit if Chemical is set to secret!
         """
         my_stock = Stock.objects.get(pk=self.kwargs['pk'])
-        if my_stock.storage.workgroup.filter(storage__workgroup=self.request.user.profile.workgroup) or \
+        if my_stock.storage.shared_workgroups.filter(storage__shared_workgroups=self.request.user.profile.workgroup) or \
                 my_stock.chemical.workgroup == self.request.user.profile.workgroup:
             if my_stock.chemical.secret and my_stock.chemical.workgroup != self.request.user.profile.workgroup:
                 return False
@@ -376,7 +377,8 @@ class StorageListView(LoginRequiredMixin, ListView):
     model = Storage
 
     def get_queryset(self):
-        object_list = self.model.objects.filter(workgroup=self.request.user.profile.workgroup)
+        # object_list = self.model.objects.filter(workgroup=self.request.user.profile.workgroup)
+        object_list = self.model.objects.filter(owner_workgroup=self.request.user.profile.workgroup)
 
         return object_list.order_by('name').distinct()
 
@@ -388,18 +390,20 @@ class StorageCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('storage-list')
 
     def form_valid(self, form):
-        print(form.cleaned_data)
-        if self.kwargs['pk'] == 0:
-            set_storage = Storage.add_root(name=form.instance.name, room=form.instance.room, creator=self.request.user)
-            workgroups = form.cleaned_data.get('workgroup')
-        else:
+        # print(form.cleaned_data)
+        if self.kwargs['pk'] == 0:  # If not child create root
+            set_storage = Storage.add_root(name=form.instance.name, room=form.instance.room, creator=self.request.user,
+                                           abbreviation=form.instance.abbreviation,
+                                           owner_workgroup=self.request.user.profile.workgroup)
+            workgroups = form.cleaned_data.get('shared_workgroups')
+        else:  # Create Child!
             root_storage = Storage.objects.get(id=self.kwargs['pk'])
             set_storage = root_storage.add_child(name=form.instance.name, room=form.instance.room,
-                                                 creator=self.request.user)
-            workgroups = root_storage.workgroup.all()
-        set_storage.workgroup.add(self.request.user.profile.workgroup)
+                                                 creator=self.request.user, abbreviation=form.instance.abbreviation,
+                                                 owner_workgroup=self.request.user.profile.workgroup)
+            workgroups = root_storage.shared_workgroups.all()
         for group in workgroups:
-            set_storage.workgroup.add(group)
+            set_storage.shared_workgroups.add(group)
 
         return HttpResponseRedirect(self.success_url)
 
@@ -407,13 +411,12 @@ class StorageCreateView(LoginRequiredMixin, CreateView):
         """Make Workgroup selection only visible, if 1. Level Storage"""
         # TODO do not show Workgroup or make it disabled if substorage
         form = super().get_form(form_class)
-        if self.kwargs['pk'] != 0:
+        # Removing owner workgroup from list
+        form.fields['shared_workgroups'].queryset = Workgroup.objects.exclude(pk=self.request.user.profile.workgroup_id)
+        if self.kwargs['pk'] != 0:  # Look for root storage (editing child storage here!)
             root_storage = Storage.objects.get(id=self.kwargs['pk'])
-            form.fields['workgroup'].initial = root_storage.workgroup.all()
-            # form.fields['workgroup'].widget = forms.HiddenInput()
+            form.fields['shared_workgroups'].initial = root_storage.shared_workgroups.all()
             form.fields['room'].initial = root_storage.room
-        else:
-            form['workgroup'].initial = self.request.user.profile
 
         return form
 
@@ -553,11 +556,11 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             # if created:
             #     print(created)
 
-            #creates chemical if not present, checks only name!
-            #TODO add stock for same chemical in list
+            # creates chemical if not present, checks only name!
+            # TODO add stock for same chemical in list
             Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
-                                                 defaults={'creator': self.request.user,
-                                                           'workgroup': self.request.user.profile.workgroup})
+                                           defaults={'creator': self.request.user,
+                                                     'workgroup': self.request.user.profile.workgroup})
 
             # chemical = Chemical(name=row[col_dict.get('chemical')], creator=self.request.user,
             #                     workgroup=self.request.user.profile.workgroup)

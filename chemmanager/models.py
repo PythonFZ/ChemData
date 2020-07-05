@@ -114,7 +114,8 @@ class Storage(MP_Node):
     room = models.CharField(max_length=100, blank=True, null=True)
     abbreviation = models.CharField(max_length=3, blank=True, null=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    workgroup = models.ManyToManyField(Workgroup)
+    shared_workgroups = models.ManyToManyField(Workgroup, blank=True)
+    owner_workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, related_name='storage_owner_workgroup')
 
     node_order_by = ['name']
 
@@ -137,7 +138,7 @@ class Storage(MP_Node):
     def full_abbr(self):
         my_abbr = ''
         for ancestor in self.get_ancestors():
-            if ancestor.abbreviation == None:
+            if ancestor.abbreviation is None:
                 pass
             else:
                 my_abbr += str(ancestor.abbreviation)
@@ -146,10 +147,10 @@ class Storage(MP_Node):
         return my_abbr
 
     def __str__(self):
-        if self.workgroup.count() > 1:
-            return mark_safe('&nbsp;&nbsp;' * (self.get_depth()-1) + self.name + ' (shared)')
+        if self.shared_workgroups.count() > 0:
+            return mark_safe('&nbsp;&nbsp;' * self.get_depth() + self.name + ' (shared)')
         else:
-            str = '&nbsp;&nbsp;' * (self.get_depth()-1) + self.name
+            str = '&nbsp;&nbsp;' * self.get_depth() + self.name
             if self.abbreviation:
                 str += f'({self.abbreviation})'
             # Intended to show Tree-View like behaviour
@@ -206,7 +207,7 @@ class Stock(SoftDeleteModel):
                 return 0
 
     def __str__(self):
-        return self.name
+        return 'Stock'
 
     class Meta:
         ordering = ['-date_changed']

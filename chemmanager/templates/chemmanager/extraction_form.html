@@ -6,10 +6,10 @@
             <form method="POST">
                 {% csrf_token %}
                 <fieldset class="form-group">
-                    <legend class="border-bottom mb-4">Create new Extraction for {{ stock.chemical }} ({{ stock.name }})
+                    <legend class="border-bottom mb-4">Create new Extraction for {{ stock.chemical }}
                     </legend>
                     {{ form|crispy }}
-                    <button class="btn btn-outline-info" type="submit">Add</button>
+                    <button class="btn btn-outline-info" type="submit">Extract</button>
                 </fieldset>
             </form>
         </div>
