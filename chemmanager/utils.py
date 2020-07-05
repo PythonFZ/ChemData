@@ -1,6 +1,6 @@
 import pubchempy as pcp
 import os.path
-from .models import Stock, Unit
+from .models import Stock, Unit, ChemicalSynonym, Chemical
 
 
 class PubChemLoader:
@@ -30,6 +30,17 @@ class PubChemLoader:
         initial_dict['cid'] = self.compound.cid
 
         return initial_dict
+
+
+def update_chemical_synonyms(chemical: Chemical, synonyms: list):
+    all_synonyms = ChemicalSynonym.objects.filter(chemical=chemical)
+    # Create those, which do not exist
+    for synonym in synonyms:
+        _, _ = ChemicalSynonym.objects.get_or_create(name=synonym, chemical=chemical)
+    # Remove those, which have been removed
+    for synonym in all_synonyms:
+        if synonym.name not in synonyms:
+            synonym.delete()
 
 
 def unit_converter(input_val, unit_name, stock: Stock):

@@ -5,10 +5,10 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Count
 from dal import autocomplete
-from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList
+from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList, ChemicalSynonym
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm, \
     ChemicalListUploadForm, ChemicalListVerifyForm
-from .utils import PubChemLoader, unit_converter
+from .utils import PubChemLoader, unit_converter, update_chemical_synonyms
 from braces import views
 from django.shortcuts import redirect
 import pandas as pd
@@ -113,7 +113,8 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
 
         query = self.request.GET.get('q')
         if query:
-            object_list = object_list.filter(name__icontains=query) | object_list.filter(cas__startswith=query)
+            object_list = object_list.filter(name__icontains=query) | object_list.filter(
+                cas__startswith=query) | object_list.filter(chemicalsynonym__name__icontains=query)
 
         # Sort by most available / largest stock count and than by name!
         object_list = object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
@@ -149,6 +150,13 @@ class ChemicalCreateView(CreateView):
     }
     chemical_name = None
 
+    # def get_form_kwargs(self):
+    #     kwargs = super(ChemicalCreateView, self).get_form_kwargs()
+    #     kwargs.update({
+    #         'request': self.request,
+    #     })
+    #     return kwargs
+
     def form_valid(self, form, **kwargs):
         """Load Data from PubChem if button is pressed"""
         # TODO add Image download
@@ -174,7 +182,16 @@ class ChemicalCreateView(CreateView):
             #     form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
             form.instance.creator = self.request.user
             form.instance.workgroup = self.request.user.profile.workgroup
-            return super().form_valid(form, **kwargs)
+
+            chemical = form.save()
+            # Need to overwrite super to get instance of chemical for synonyms and later for stock!
+            # TODO Write Stock creation after chemical creation here
+            update_chemical_synonyms(chemical=chemical,
+                                     synonyms=form.cleaned_data.get('synonyms').splitlines())
+
+            return HttpResponseRedirect(
+                reverse_lazy('chemical-list', kwargs={'pk': chemical.id}) + f'?q={chemical.name}')
+            # return super().form_valid(form, **kwargs)
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -217,10 +234,22 @@ class ChemicalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 messages.add_message(self.request, messages.WARNING,
                                      f'Chemical already created for Group {self.request.user.profile.workgroup}!')
                 return self.render_to_response(context)
-            # Check if CID has been generated, that means always, that an Image should be available!
-            # if (form.data.get('image') == '') and (form.data.get('cid') is not None):
-            #     form.instance.image = f'/chemical_pics/{form.data.get("cid")}.png'
+
+            update_chemical_synonyms(chemical=chemical,
+                                     synonyms=form.cleaned_data.get('synonyms').splitlines())
+
             return super().form_valid(form)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        chemical = self.get_object()
+        # Show synonyms per line in TextArea
+        synonyms = ''
+        for synonym in chemical.chemicalsynonym_set.all():
+            synonyms += synonym.name + '\n'
+        form['synonyms'].initial = synonyms
+
+        return form
 
     def test_func(self):
         chemical = self.get_object()

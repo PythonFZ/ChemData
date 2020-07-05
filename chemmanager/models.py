@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from PIL import Image
 
+
 # soft delete: https://blog.usebutton.com/cascading-soft-deletion-in-django
 
 # Own classes to inherit from:
@@ -43,8 +44,6 @@ class SoftDeleteModel(models.Model):
         self.save()
 
 
-
-
 class Distributor(models.Model):
     name = models.CharField(max_length=100)
 
@@ -53,8 +52,7 @@ class Distributor(models.Model):
 
 
 class Chemical(models.Model):
-
-    #TODO use distributor (First stock creation)
+    # TODO use distributor (First stock creation)
     name = models.CharField(max_length=250)
     structure = models.CharField(max_length=250, blank=True, null=True)
     molar_mass = models.FloatField(blank=True, null=True)
@@ -158,7 +156,6 @@ class Storage(MP_Node):
 
 
 class Stock(SoftDeleteModel):
-
     # name = models.CharField(max_length=250)
 
     distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE, blank=True, null=True)
@@ -171,8 +168,8 @@ class Stock(SoftDeleteModel):
 
     label = models.CharField(max_length=10, blank=True, null=True)
 
-    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE,)
-    storage = models.ForeignKey(Storage, on_delete=models.CASCADE,)
+    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE, )
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE, )
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
     @property
@@ -236,14 +233,13 @@ class Extraction(models.Model):
 
 
 class ChemicalList(models.Model):
-
     workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, blank=True, null=True)
     file = models.FileField(upload_to='csv')
 
 
+class ChemicalSynonym(models.Model):
+    name = models.CharField(max_length=250)
+    chemical = models.ForeignKey(Chemical, on_delete=models.CASCADE)
 
-
-
-
-
-
+    def __str__(self):
+        return self.name
