@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Count
 from dal import autocomplete
-from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList, ChemicalSynonym
+from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList, ChemicalSynonym, Unit
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm, \
     ChemicalListUploadForm, ChemicalListVerifyForm
 from .utils import PubChemLoader, unit_converter, update_chemical_synonyms
@@ -583,17 +583,31 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         # col_dict = {v: int(k) for k, v in request.POST.items()} #inverts e.g. 1: chemical -> chemical: 1
 
         for index, row in frame.iterrows():
-            # chemical, created = Chemical.objects.get_or_create(name=Chemical(row[col_dict.get('chemical')]),
-            #                                                    defaults={'creator': self.request.user,
-            #                                                       'workgroup': self.request.user.profile.workgroup})
-            # if created:
-            #     print(created)
+            chemical, created = Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
+                                                       defaults={'creator': self.request.user,
+                                                                 'workgroup': self.request.user.profile.workgroup})
+            if not created:
+                try:
+                    stock = Stock.objects.get(chemical=chemical, label=row[col_dict.get('label')])
+                except Stock.DoesNotExist:
+                    stock = Stock(chemical=chemical)
+                    stock.quantity = 1
+                    stock.unit = Unit.objects.get(name='ml')
+                    stock.storage = Storage.objects.get(name='Test')
+                    stock.save()
+                    print(created)
+                    stock.save()
+                #stock.label = row[col_dict.get('label')]
+
+
 
             # creates chemical if not present, checks only name!
             # TODO add stock for same chemical in list
-            Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
-                                           defaults={'creator': self.request.user,
-                                                     'workgroup': self.request.user.profile.workgroup})
+            # Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
+            #                                defaults={'creator': self.request.user,
+            #                                          'workgroup': self.request.user.profile.workgroup})
+            # stock = Stock(label=row[col_dict.get('label')
+            # stock.chemical = ch
 
             # chemical = Chemical(name=row[col_dict.get('chemical')], creator=self.request.user,
             #                     workgroup=self.request.user.profile.workgroup)

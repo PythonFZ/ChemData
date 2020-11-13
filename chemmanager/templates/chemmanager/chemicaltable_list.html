@@ -3,20 +3,32 @@
 
 {% block base_content %}
 <main role="main" class="container">
-    <table class="table table-striped table-sm table-light table-hover" style="width: 50%">
+    <table class="table table-striped table-sm table-light table-hover table-fixed" style="width: 50%">
         <thead>
         <tr>
             <th scope="col"> Name</th>
             <th>Molar Mass</th>
+            <th>Stocks</th>
+            <th>Total volume</th>
+            <th>Location</th>
         </tr>
         </thead>
         <tbody>
 {#  TODO STOCK instead of chemicals!      #}
         {% for chemical in chemicals %}
             <tr>
-                <td><a href="{% url 'chemical-update' chemical.id %}">{{ chemical.name }}</a></td>
+             <td><a href="{% url 'chemical-update' chemical.id %}">{{ chemical.name }}</a></td>
                 <td>{{ chemical.molar_mass }}</td>
-            </tr>
+                 {% for stock in chemical.stock_set.all %}
+                     {% if forloop.last %}
+
+                     <td>{{forloop.counter}}</td>
+                          <td></td>
+                         <td><b>{{stock.storage.location_name}}</b> {{ stock.label }}</td>
+                     {% endif %}
+                {% endfor %}
+
+               </tr>
         {% endfor %}
         </tbody>
     </table>
