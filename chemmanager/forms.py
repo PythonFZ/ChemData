@@ -67,7 +67,7 @@ class StockUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request')
         super(StockUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['storage'].queryset = Storage.objects.filter(owner_workgroup__exact=request.user.profile.workgroup)
+        self.fields['storage'].queryset = Storage.objects.filter(workgroup__exact=request.user.profile.workgroup)
 
     class Meta:
         model = Stock
@@ -107,12 +107,11 @@ class ChemicalListVerifyForm(forms.Form):
         super(ChemicalListVerifyForm, self).__init__(*args, **kwargs)
         # choices = [(f.name, f.name) for f in Stock._meta.get_fields()]
         # choices.append(('--', 'empty'))
-        required_fields = [f.name for f in Stock._meta.get_fields() if not getattr(f, 'blank', False) is True]
 
         choices = [('', '--')] + [(f.name, f.name) for f in Stock._meta.get_fields()]
-        choices = [x for x in choices if x not in (('id', 'id'), ('softdeletemodel_ptr', 'softdeletemodel_ptr'))]
-
-        choices = [f if f[1] not in required_fields else (f[0], f[1] + '*') for f in choices]
+        # Remove prepopulated entries
+        choices = [x for x in choices if x not in (2 * ('id',), 2 * ('softdeletemodel_ptr',), 2 * ('deleted_at',), 2 * ('extraction', ), 2 * ('date_changed',))]
+        choices = [f if f[1] not in Stock.get_required_fields() else (f[0], f[1] + '*') for f in choices]
         # makes new list without id, softdelete_pzt etc.
         # TODO filter choices (no id), capitalize,default option
         # TODO Required choices marked with 'star'

@@ -23,7 +23,7 @@ class SearchParameterAutocomplete(LoginRequiredMixin, autocomplete.Select2ListVi
     def get_list(self):
         parameter_list = ['only stocked']
         for my_storage in Storage.objects.filter(shared_workgroups=self.request.user.profile.workgroup).all():
-            parameter_list.append(my_storage.owner_workgroup.name)
+            parameter_list.append(my_storage.workgroup.name)
         return list(set(parameter_list))
 
 
@@ -302,7 +302,7 @@ class StockDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         """Check if User is in group and allowed to remove Stock"""
         stock = self.get_object()
-        if self.request.user.profile.workgroup == stock.storage.owner_workgroup:
+        if self.request.user.profile.workgroup == stock.storage.workgroup:
             return True
         else:
             return False
@@ -411,7 +411,7 @@ class StorageListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # object_list = self.model.objects.filter(workgroup=self.request.user.profile.workgroup)
-        object_list = self.model.objects.filter(owner_workgroup=self.request.user.profile.workgroup)
+        object_list = self.model.objects.filter(workgroup=self.request.user.profile.workgroup)
 
         return object_list.order_by('name').distinct()
 
@@ -427,13 +427,13 @@ class StorageCreateView(LoginRequiredMixin, CreateView):
         if self.kwargs['pk'] == 0:  # If not child create root
             set_storage = Storage.add_root(name=form.instance.name, room=form.instance.room, creator=self.request.user,
                                            abbreviation=form.instance.abbreviation,
-                                           owner_workgroup=self.request.user.profile.workgroup)
+                                           workgroup=self.request.user.profile.workgroup)
             workgroups = form.cleaned_data.get('shared_workgroups')
         else:  # Create Child!
             root_storage = Storage.objects.get(id=self.kwargs['pk'])
             set_storage = root_storage.add_child(name=form.instance.name, room=form.instance.room,
                                                  creator=self.request.user, abbreviation=form.instance.abbreviation,
-                                                 owner_workgroup=self.request.user.profile.workgroup)
+                                                 workgroup=self.request.user.profile.workgroup)
             workgroups = root_storage.shared_workgroups.all()
         for group in workgroups:
             set_storage.shared_workgroups.add(group)
@@ -551,13 +551,14 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
 
-        frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
+        frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None, encoding='utf-8')
         context['frame'] = frame.to_dict('split')
         context['form'] = ChemicalListVerifyForm(columns=frame.columns)
         return context
 
     def post(self, request, *args, **kwargs):
-        '''!!!Saves into database!!!!'''
+        """Saves into database
+        """
         # request.POST dictionary of chosen data (e.g. '0':'Storage')
         col_dict = {}
         for k, v in request.POST.items():
@@ -565,11 +566,9 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                 col_dict[v] = int(k)
             except ValueError:
                 pass
-        required_fields = [f.name for f in Stock._meta.get_fields() if not getattr(f, 'blank', False) is True]
-        required_fields = [f for f in required_fields if f not in ('id', 'softdeletemodel_ptr')]  # f =field
-        print(required_fields)
+
         missing_fields = []
-        for element in required_fields:
+        for element in Stock.get_required_fields():
             if element not in col_dict:
                 missing_fields.append(element)
 
@@ -583,55 +582,48 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         # col_dict = {v: int(k) for k, v in request.POST.items()} #inverts e.g. 1: chemical -> chemical: 1
 
         for index, row in frame.iterrows():
+            print('---------------------')
+            print(row)
+            print(col_dict)
+            print('---------------------')
             chemical, created = Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
-                                                       defaults={'creator': self.request.user,
-                                                                 'workgroup': self.request.user.profile.workgroup})
-            if not created:
+                                                               defaults={'creator': self.request.user,
+                                                                         'workgroup': self.request.user.profile.workgroup})
+            # if not created:
+            # try:
+            #     stock = Stock.objects.get(chemical=chemical, label=row[col_dict.get('label')])
+            #     # TODO WHY?
+            # except (Stock.DoesNotExist, KeyError):
+            stock = Stock(chemical=chemical)
+            try:
+                stock.quantity = row[col_dict.get('quantity')]
+            except KeyError:
+                stock.quantity = -1
+            # stock.quantity = 1  # TODO convert quantity to float
+
+            if 'unit' in col_dict:
                 try:
-                    stock = Stock.objects.get(chemical=chemical, label=row[col_dict.get('label')])
-                except Stock.DoesNotExist:
-                    stock = Stock(chemical=chemical)
-                    stock.quantity = 1
-                    stock.unit = Unit.objects.get(name='ml')
-                    stock.storage = Storage.objects.get(name='Test')
-                    stock.save()
-                    print(created)
-                    stock.save()
-                #stock.label = row[col_dict.get('label')]
+                    stock.unit = Unit.objects.get(name=row[col_dict.get('unit')])
+                except Unit.DoesNotExist:
+                    stock.unit = Unit.objects.get(name='None')
 
+            if 'label' in col_dict:
+                stock.label = row[col_dict.get('label')]
 
+            if 'storage' in col_dict:
+                try:
+                    stock.storage = Storage.objects.get(name=row[col_dict.get('storage')])
+                except Storage.DoesNotExist:
+                    stock.storage = Storage.add_root(name=row[col_dict.get('storage')], creator=self.request.user,
+                                                     workgroup=self.request.user.profile.workgroup)
+            else:
+                # When no storage is selected, then everything will be stored in a (new) "default" storage
+                try:
+                    stock.storage = Storage.objects.get(name='default')
+                except Storage.DoesNotExist:
+                    stock.storage = Storage.add_root(name='default', creator=self.request.user,
+                                                     workgroup=self.request.user.profile.workgroup)
 
-            # creates chemical if not present, checks only name!
-            # TODO add stock for same chemical in list
-            # Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
-            #                                defaults={'creator': self.request.user,
-            #                                          'workgroup': self.request.user.profile.workgroup})
-            # stock = Stock(label=row[col_dict.get('label')
-            # stock.chemical = ch
-
-            # chemical = Chemical(name=row[col_dict.get('chemical')], creator=self.request.user,
-            #                     workgroup=self.request.user.profile.workgroup)
-            # chemical.save()
-
-            # chemical = Chemical(name=row[col_dict.get('chemical')])
-            # chemical = Chemical(name=row['Substance'])
-            # chemical.creator = self.request.user
-            # chemical.workgroup = self.request.user.profile.workgroup
-        #
-        #     chemical.save()
-        #     stock = Stock(name='Standard')
-        #     stock.chemical = chemical
-        #     #stock.cas = row['cas']
-        #     stock.comment = row['Additional Information']
-        #     #stock.distributor = row['Distributor']
-        #     #stock.unit = row['unit']
-        #     stock.Storage = row['Location']
-        #     stock.label = row['Number']
-        #     stock.save
-        #
-        # for key in request.POST:
-        #     if request.POST[key] in choices:
-        #         print(f'stock.{request.POST[key]}')
-        #         print(key)
+            stock.save()
 
         return self.get(request, *args, **kwargs)

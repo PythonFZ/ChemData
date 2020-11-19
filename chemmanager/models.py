@@ -113,7 +113,7 @@ class Storage(MP_Node):
     abbreviation = models.CharField(max_length=3, blank=True, null=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     shared_workgroups = models.ManyToManyField(Workgroup, blank=True)
-    owner_workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, related_name='storage_owner_workgroup')
+    workgroup = models.ForeignKey(Workgroup, on_delete=models.CASCADE, related_name='storage_workgroup')
 
     node_order_by = ['name']
 
@@ -212,6 +212,15 @@ class Stock(SoftDeleteModel):
     def get_absolute_url(self):
         url = reverse('chemical-list', kwargs={'pk': self.chemical.pk}) + '?q=' + self.chemical.name
         return url
+
+    @classmethod
+    def get_required_fields(cls):
+        required_fields = [f.name for f in cls._meta.get_fields() if not getattr(f, 'blank', False) is True]
+        # Remove prepopulated entries
+        required_fields = [x for x in required_fields if
+                           x not in ['unit', 'date_created', 'storage', 'id', 'softdeletemodel_ptr', 'deleted_at',
+                                     'extraction']]
+        return required_fields
 
 
 class Extraction(models.Model):
