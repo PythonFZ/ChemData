@@ -117,7 +117,8 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
                 cas__startswith=query) | object_list.filter(chemicalsynonym__name__icontains=query)
 
         # Sort by most available / largest stock count and than by name!
-        object_list = object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
+        # object_list = object_list.annotate(count=Count('stock__id')).order_by('-count', 'name').distinct()
+        object_list = object_list.order_by('name').distinct()
         return object_list
 
     def get_context_data(self, **kwargs):
@@ -507,38 +508,6 @@ class ChemicalListUploadView(LoginRequiredMixin, UserPassesTestMixin, CreateView
             return self.render_to_response(context)
 
 
-# class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-#     model = ChemicalList
-#
-#     def test_func(self):
-#         return True
-#
-#     def get_context_data(self, **kwargs):
-#         '''gets data from uplaoded csv-file and prints out its data'''
-#         context = super().get_context_data(**kwargs)
-#         my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
-#
-#         frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
-#         context['frame'] = frame.to_dict('split')
-# #TODO delete or die
-#         # for index,row in frame.iterrows():
-#         #     print(row['Substance'])
-#         #     chemical = Chemical(name=row['Substance'])
-#         #     chemical.creator = self.request.user
-#         #     chemical.workgroup = self.request.user.profile.workgroup
-#         #
-#         #     chemical.save()
-#         #     stock = Stock(name='Standard')
-#         #     stock.chemical = chemical
-#         #     #stock.cas = row['cas']
-#         #     stock.comment = row['Additional Information']
-#         #     #stock.distributor = row['Distributor']
-#         #     #stock.unit = row['unit']
-#         #     stock.Storage = row['Location']
-#         #     stock.label = row['Number']
-#         #     stock.save
-#         return context
-
 class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'chemmanager/chemicallist_list.html'
     model = ChemicalList
@@ -582,10 +551,10 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         # col_dict = {v: int(k) for k, v in request.POST.items()} #inverts e.g. 1: chemical -> chemical: 1
 
         for index, row in frame.iterrows():
-            print('---------------------')
-            print(row)
-            print(col_dict)
-            print('---------------------')
+            # print('---------------------')
+            # print(row)
+            # print(col_dict)
+            # print('---------------------')
             chemical, created = Chemical.objects.get_or_create(name=row[col_dict.get('chemical')],
                                                                defaults={'creator': self.request.user,
                                                                          'workgroup': self.request.user.profile.workgroup})
@@ -595,17 +564,20 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             #     # TODO WHY?
             # except (Stock.DoesNotExist, KeyError):
             stock = Stock(chemical=chemical)
-            try:
-                stock.quantity = row[col_dict.get('quantity')]
-            except KeyError:
+            if 'quantity' in col_dict:
+                # try:
+                #     stock.quantity = float(row[col_dict.get('quantity')].replace("[^0-9]", ""))
+                # except ValueError:
                 stock.quantity = -1
-            # stock.quantity = 1  # TODO convert quantity to float
+                # stock.quantity = 1  # TODO convert quantity to float
 
             if 'unit' in col_dict:
                 try:
                     stock.unit = Unit.objects.get(name=row[col_dict.get('unit')])
                 except Unit.DoesNotExist:
                     stock.unit = Unit.objects.get(name='None')
+            else:
+                stock.unit = Unit.objects.get(name='None')
 
             if 'label' in col_dict:
                 stock.label = row[col_dict.get('label')]
