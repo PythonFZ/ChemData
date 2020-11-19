@@ -1,0 +1,47 @@
+[
+  {
+    "model": "chemmanager.unit",
+    "pk": 1,
+    "fields": {
+      "name": "mL",
+      "equals_standard": 0.001,
+      "equals_standard_unit": 2
+    }
+  },
+  {
+    "model": "chemmanager.unit",
+    "pk": 2,
+    "fields": {
+      "name": "L",
+      "equals_standard": 1.0,
+      "equals_standard_unit": 2
+    }
+  },
+  {
+    "model": "chemmanager.unit",
+    "pk": 3,
+    "fields": {
+      "name": "g",
+      "equals_standard": 1.0,
+      "equals_standard_unit": 3
+    }
+  },
+  {
+    "model": "chemmanager.unit",
+    "pk": 4,
+    "fields": {
+      "name": "kg",
+      "equals_standard": 1000.0,
+      "equals_standard_unit": 3
+    }
+  },
+  {
+    "model": "chemmanager.unit",
+    "pk": 5,
+    "fields": {
+      "name": "mg",
+      "equals_standard": 0.001,
+      "equals_standard_unit": 3
+    }
+  }
+]
