@@ -10,9 +10,23 @@ from PIL import Image
 
 
 # soft delete: https://blog.usebutton.com/cascading-soft-deletion-in-django
+# SET_NULL makes it so when this chemicals creator gets deleted, it will continue
+  # to exist without  creator (admin can cahnge it).
+  # creator = models.ForeignKey(User, on_delete=models.SET_NULL)
 
 # Own classes to inherit from:
 
+class Post(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    date_posted = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)  # Remove the post, if User is deleted
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('post-detail', kwargs={'pk': self.pk})
 
 class SoftDeleteManager(models.Manager):
     def __init__(self, *args, **kwargs):

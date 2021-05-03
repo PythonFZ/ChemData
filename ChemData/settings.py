@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['*', '127.0.0.1', '192.168.37.82', '192.168.37.159', 'localhost
 INSTALLED_APPS = [
     'chemmanager.apps.ChemmanagerConfig',
     'users.apps.UsersConfig',
-    'blog.apps.BlogConfig',
+    #'blog.apps.BlogConfig',
     'crispy_forms',
     'treebeard',
     "django_static_fontawesome",

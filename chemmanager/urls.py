@@ -17,13 +17,18 @@ from .views import (
     SearchParameterAutocomplete,
     ChemicalListUploadView,
     ChemicalListVerifyView,
-    ChemicalTableView
+    ChemicalTableView,
+    PostListView,
 )
+from . import views
 
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    path('', login_required(ChemicalListView.as_view()), name='chemmanager-home'),
+    path('', PostListView.as_view(), name='home'),
+    path('about/', views.about, name='blog-about'),
+    path('blog/', views.blog, name='blog-home'),
+    path('chemmanager/', login_required(ChemicalListView.as_view()), name='chemmanager-home'),
     path('<int:pk>/', ChemicalListView.as_view(), name='chemical-list'),
     path('chemical/all/', ChemicalTableView.as_view(), name='chemical-table'),
     path('upload/chemicallist/<int:pk>/verify/', ChemicalListVerifyView.as_view(), name='chemicallist-verify'),

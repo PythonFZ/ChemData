@@ -5,6 +5,7 @@
 <main role="main" class="container">
     <table class="table table-striped table-sm table-light table-hover table-fixed" style="width: 50%">
         <thead>
+        <a class="button" href="{% url 'chemicallist-upload' %}">Old lists</a>
         <tr>
             <th scope="col"> Name</th>
             <th>Molar Mass</th>
@@ -20,10 +21,11 @@
              <td><a href="{% url 'chemical-update' chemical.id %}">{{ chemical.name }}</a></td>
                 <td>{{ chemical.molar_mass }}</td>
                  {% for stock in chemical.stock_set.all %}
+
                      {% if forloop.last %}
 
                      <td>{{forloop.counter}}</td>
-                          <td></td>
+                          <td>{{ stock.quantity }}</td>
                          <td><b>{{stock.storage.location_name}}</b> {{ stock.label }}</td>
                      {% endif %}
                 {% endfor %}

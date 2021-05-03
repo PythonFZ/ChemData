@@ -5,13 +5,25 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Count
 from dal import autocomplete
-from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList, ChemicalSynonym, Unit
+from .models import Chemical, Stock, Extraction, Storage, Distributor, Workgroup, ChemicalList, ChemicalSynonym, Unit, Post
 from .forms import ChemicalCreateForm, StockUpdateForm, ExtractionCreateForm, StorageCreateForm, SearchParameterForm, \
     ChemicalListUploadForm, ChemicalListVerifyForm
 from .utils import PubChemLoader, unit_converter, update_chemical_synonyms
 from braces import views
 from django.shortcuts import redirect
 import pandas as pd
+from django.shortcuts import render
+
+def about(request):
+    return render(request, 'chemmanager/about.html', {'title': 'About'})
+
+def blog(request):
+    return render(request, 'chemmanager/blog_home.html')
+class PostListView(ListView):
+    model = Post
+    template_name = 'chemmanager/home.html'
+    context_object_name = 'posts'
+    ordering = ['-date_posted']
 
 
 class ChemicalDetailView(LoginRequiredMixin, DetailView):
@@ -80,9 +92,10 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
     # TODO user passes test!
     # TODO Search-parameter should not be reset on page reload!
     model = Chemical
-    paginate_by = 50
-    template_name = 'chemmanager/home.html'
+
+    template_name = 'chemmanager/chemdata_home.html'
     context_object_name = 'chemicals'
+    paginate_by = 50
     extra_context = {
         'title': 'Chemical Manager',
         'chemical_detail': None,
@@ -140,7 +153,11 @@ class ChemicalListView(views.JSONResponseMixin, views.AjaxResponseMixin, LoginRe
 
 
 class ChemicalTableView(ChemicalListView):
+    model = Chemical
+
     template_name = 'chemmanager/chemicaltable_list.html'
+    context_object_name = 'chemicals'
+    paginate_by = 100000
 
 
 class ChemicalCreateView(CreateView):
@@ -516,11 +533,11 @@ class ChemicalListVerifyView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return True
 
     def get_context_data(self, **kwargs):
-        '''gets data from uplaoded csv-file and prints out its data'''
+        '''gets data from uploaded csv-file and prints out its data'''
         context = super().get_context_data(**kwargs)
         my_chemicallist = ChemicalList.objects.get(id=self.kwargs['pk'])
 
-        frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None, encoding='utf-8')
+        frame = pd.read_csv(my_chemicallist.file.path, engine='python', sep=None)
         context['frame'] = frame.to_dict('split')
         context['form'] = ChemicalListVerifyForm(columns=frame.columns)
         return context
