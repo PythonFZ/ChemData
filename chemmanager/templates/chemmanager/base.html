@@ -44,19 +44,27 @@
     {% endif %}
 </head>
 <body>
+
+<style>
+    @media (min-width: 1400px) {
+        .container {
+            max-width: 1600px;
+        }
+    }
+</style>
+
 <header class="site-header">
     <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-            <a class="navbar-brand mr-4" href="{% url 'home' %}">Home</a>
+            <a class="navbar-brand mr-4" href="{% url 'chemmanager-home' %}">Chemical Manager</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
                     aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarToggle">
                 <div class="navbar-nav mr-auto">
-                    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">Chemical Manager</a>
-                    <a class="nav-item nav-link" href="{% url 'blog-home' %}">Blog</a>
-                    <a class="nav-item nav-link" href="{% url 'blog-about' %}">About</a>
+                    {% block navigation-bar %}
+                    {% endblock %}
                 </div>
                 <!-- Navbar Right Side -->
                 <div class="navbar-nav">
