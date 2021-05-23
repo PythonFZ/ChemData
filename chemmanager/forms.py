@@ -95,6 +95,7 @@ class ExtractionCreateForm(forms.ModelForm):
 
 
 class ChemicalListUploadForm(forms.ModelForm):
+    """This is a Form"""
     class Meta:
         model = ChemicalList
         fields = ('file',)
