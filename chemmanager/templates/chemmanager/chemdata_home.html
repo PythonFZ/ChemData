@@ -348,6 +348,18 @@
     </script>
 {% endblock %}
 
+{% block navigation-bar %}
+    <form class="form-inline">
+        <button class="btn btn-success"><i class="fas fa-plus"></i>&nbsp;Add Chemical</button>
+        <button class="btn btn-success"><i class="fas fa-archive"></i>&nbsp;Manage Storage</button>
+        <button class="btn btn-success"><i class="fas fa-upload"></i>&nbsp;Upload Chemical List</button>
+    </form>
+
+{#    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">Chemical Manager</a>#}
+{#    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">Blog</a>#}
+{#    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">About</a>#}
+{% endblock %}
+
 {% block custom_head %}
     <link rel="stylesheet" type="text/css" href="{% static "fontawesome/css/all.min.css" %}"/>
     <style>
