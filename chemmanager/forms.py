@@ -95,12 +95,14 @@ class ExtractionCreateForm(forms.ModelForm):
 
 
 class ChemicalListUploadForm(forms.ModelForm):
+    """This is a Form"""
     class Meta:
         model = ChemicalList
         fields = ('file',)
 
 
 class ChemicalListVerifyForm(forms.Form):
+    """This is a Form"""
 
     def __init__(self, *args, **kwargs):
         columns = kwargs.pop('columns')
