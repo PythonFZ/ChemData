@@ -1,0 +1,28 @@
+name: Build the documentation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Install dependencies
+        run: |
+          pip3 install sphinx
+      - name: Build documentation
+        run: |
+          cd docs
+          make html
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: documentation
+          path: |
+            docs/_build
