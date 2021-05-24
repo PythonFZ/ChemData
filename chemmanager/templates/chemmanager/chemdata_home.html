@@ -24,14 +24,6 @@
                             <a href="{% url 'chemmanager-home' %}" class="dropdown-item"
                                onclick="clear_local_storage()">
                                 <i class="fas fa-undo"></i>&nbsp;Reset</a>
-                            <a href="{% url 'chemical-create' %}" class="dropdown-item" onclick="clear_local_storage()">
-                                <i class="fas fa-plus"></i>&nbsp;Add Chemical</a>
-                            <a href="{% url 'storage-list' %}" class="dropdown-item" onclick="clear_local_storage()">
-                                <i class="fas fa-archive"></i>&nbsp;Manage Storage</a>
-                            <a href="{% url 'chemical-table' %}" class="dropdown-item" onclick="clear_local_storage()">
-                                <i class="fas fa-table"></i>&nbsp;View as table</a>
-                            <a href="{% url 'chemicallist-upload' %}" class="dropdown-item" onclick="clear_local_storage()">
-                                <i class="fas fa-upload"></i>&nbsp;Upload Chemical List</a>
                         </div>
                     </div>
                 </div>
@@ -342,17 +334,16 @@
                         localStorage.removeItem('open_' + 'collapseAll-' + id);
                     }
                 });
-        })
-        ;
+        });
 
     </script>
 {% endblock %}
 
 {% block navigation-bar %}
     <form class="form-inline">
-        <button class="btn btn-success"><i class="fas fa-plus"></i>&nbsp;Add Chemical</button>
-        <button class="btn btn-success"><i class="fas fa-archive"></i>&nbsp;Manage Storage</button>
-        <button class="btn btn-success"><i class="fas fa-upload"></i>&nbsp;Upload Chemical List</button>
+        <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i class="fas fa-plus"></i>&nbsp;Add Chemical</a>
+        <a href="{% url 'storage-list' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i class="fas fa-archive"></i>&nbsp;Manage Storage</a>
+        <a href="{% url 'chemicallist-upload' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i class="fas fa-upload"></i>&nbsp;Upload Chemical List</a>
     </form>
 
 {#    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">Chemical Manager</a>#}
