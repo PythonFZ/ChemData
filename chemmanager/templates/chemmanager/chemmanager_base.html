@@ -1,33 +1,20 @@
 {% extends "chemmanager/base.html" %}
 {% block base_content %}
+    <ul class="nav nav-tabs navbar-collapse">
+        <li class="nav-item">
+            <a class="nav-link active" href="#"><i class="fas fa-flask"></i>&nbsp;Chemical Manager</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#"><i class="fas fa-plus"></i>&nbsp;Add Chemical</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#"><i class="fas fa-archive"></i>&nbsp;Manage Storage</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#"><i class="fas fa-upload"></i>&nbsp;Upload Chemical List</a>
+        </li>
+    </ul>
     <main role="main" class="container">
-        <div class="row">
-            <div class="col-sm-8">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm">
-                                <a href="{% url 'chemical-create' %}" class="btn btn-outline-dark"
-                                   onclick="clear_local_storage()"><i
-                                        class="fas fa-plus"></i>&nbsp;Add Chemical</a>
-                            </div>
-                            <div class="col-sm">
-                                <a href="{% url 'storage-list' %}" class="btn btn-outline-dark"
-                                   onclick="clear_local_storage()"><i
-                                        class="fas fa-archive"></i>&nbsp;Manage Storage</a>
-                            </div>
-                            <div class="col-sm">
-                                <a href="{% url 'chemicallist-upload' %}" class="btn btn-outline-dark"
-                                   onclick="clear_local_storage()"><i class="fas fa-upload"></i>&nbsp;Upload Chemical
-                                    List</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
         {% block search_bar %}{% endblock %}
         <div class="row">
             <div class="col-sm-8">
