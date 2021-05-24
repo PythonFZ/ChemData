@@ -1,21 +1,48 @@
 {% extends "chemmanager/base.html" %}
 {% block base_content %}
-<main role="main" class="container">
-    {% block search_bar %}{% endblock %}
-    <div class="row">
-        <div class="col-sm-8">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.level_tag }}">
-                        {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+    <main role="main" class="container">
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm">
+                                <a href="{% url 'chemical-create' %}" class="btn btn-outline-dark"
+                                   onclick="clear_local_storage()"><i
+                                        class="fas fa-plus"></i>&nbsp;Add Chemical</a>
+                            </div>
+                            <div class="col-sm">
+                                <a href="{% url 'storage-list' %}" class="btn btn-outline-dark"
+                                   onclick="clear_local_storage()"><i
+                                        class="fas fa-archive"></i>&nbsp;Manage Storage</a>
+                            </div>
+                            <div class="col-sm">
+                                <a href="{% url 'chemicallist-upload' %}" class="btn btn-outline-dark"
+                                   onclick="clear_local_storage()"><i class="fas fa-upload"></i>&nbsp;Upload Chemical
+                                    List</a>
+                            </div>
+                        </div>
                     </div>
-                {% endfor %}
-            {% endif %}
-            {% block content %}{% endblock %}
+                </div>
+
+            </div>
         </div>
-        <div class="col-sm-4">
-            {% block properties %}{% endblock %}
+
+        {% block search_bar %}{% endblock %}
+        <div class="row">
+            <div class="col-sm-8">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.level_tag }}">
+                            {% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% block content %}{% endblock %}
+            </div>
+            <div class="col-sm-4">
+                {% block properties %}{% endblock %}
+            </div>
         </div>
-    </div>
-</main>
+    </main>
 {% endblock base_content %}
