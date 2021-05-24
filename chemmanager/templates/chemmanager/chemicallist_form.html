@@ -7,6 +7,7 @@
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary">Upload List</button>
+            <a href="{% url 'chemmanager-home'%}" class="btn btn-outline-danger">Cancel</a>
         </form>
 
 {% endblock %}
