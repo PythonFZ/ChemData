@@ -19,6 +19,7 @@ def about(request):
 
 def blog(request):
     return render(request, 'chemmanager/blog_home.html')
+
 class PostListView(ListView):
     model = Post
     template_name = 'chemmanager/home.html'
