@@ -1,0 +1,19 @@
+name: Deploy App
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH on remote machine
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            whoami
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USER }}
+          key: ${{ secrets.PRIVATE_KEY}}
