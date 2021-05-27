@@ -13,7 +13,7 @@ jobs:
         uses: fifsky/ssh-action@master
         with:
           command: |
-            /opt/ChemData/HelloWorld.sh
+            /opt/ChemData/UpdateChemData.sh
           host: ${{ secrets.HOST }}
           user: ${{ secrets.USER }}
           key: ${{ secrets.PRIVATE_KEY}}
