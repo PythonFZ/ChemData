@@ -1,6 +1,6 @@
 {% extends "chemmanager/chemmanager_base.html" %}
 {% load static %}
-{#{% load crispy_forms_tags %}#}python
+{#{% load crispy_forms_tags %}#}
 
 {% block search_bar %}
     <div class="mb-3"></div>  {% comment %}Add some vertical spacing{% endcomment %}
@@ -68,13 +68,11 @@
                                     class="fas fa-search"></i>
                             </button>
                             {% comment %}If you change this to button the x is centered ... coudln't fix it{% endcomment %}
-                            <a class="btn btn-success" href="{% url 'chemmanager-home' %}"><i class="fas fa-times" onclick="clear_local_storage()"></i></a>
+                            <a class="btn btn-success" href="{% url 'chemmanager-home' %}"><i class="fas fa-times"
+                                                                                              onclick="clear_local_storage()"></i></a>
                         </div>
                     </div>
                 </div>
-
-
-                {#                </div>#}
             </div>
         </div>
     </form>
@@ -94,8 +92,8 @@
     {% endif %}
     <div class="media mb-3">
         <div class="media-body">
-            {% for chemical in chemicals %}
-                <ul class="list-group list-group-flush">
+            <ul class="list-group list-group-flush">
+                {% for chemical in chemicals %}
                     <li class="list-group-item chemical-item" id="list-item-{{ chemical.id }}">
                         <div>
                             <div class="d-flex justify-content-between">
@@ -206,8 +204,8 @@
                             </table>
                         </div>
                     </li>
-                </ul>
-            {% endfor %}
+                {% endfor %}
+            </ul>
         </div>
     </div>
 
@@ -378,20 +376,20 @@
 {% endblock %}
 
 {% block navigation-bar %}
-        <li class="nav-link active">
-            <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
-                    class="fas fa-flask"></i></i>&nbsp;List View</a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
-                    class="fas fa-plus"></i>&nbsp;Add Chemical</a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'storage-list' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
-                    class="fas fa-archive"></i>&nbsp;Manage Storage</a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'chemicallist-upload' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
-                    class="fas fa-upload"></i>&nbsp;Upload Chemical List</a>
-        </li>
+    <li class="nav-link active">
+        <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                class="fas fa-flask"></i>&nbsp;List View</a>
+    </li>
+    <li class="nav-link">
+        <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                class="fas fa-plus"></i>&nbsp;Add Chemical</a>
+    </li>
+    <li class="nav-link">
+        <a href="{% url 'storage-list' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                class="fas fa-archive"></i>&nbsp;Manage Storage</a>
+    </li>
+    <li class="nav-link">
+        <a href="{% url 'chemicallist-upload' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                class="fas fa-upload"></i>&nbsp;Upload Chemical List</a>
+    </li>
 {% endblock %}
