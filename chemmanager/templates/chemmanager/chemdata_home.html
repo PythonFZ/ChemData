@@ -8,8 +8,8 @@
         <div class="row">
             <div class="col-sm-8">
                 {#                <div class="md-form input-group">#}
-                <div class="d-flex flex-row">
-                    <div class="p-2">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
                         <div class="dropdown">
                             <button class="btn btn-lg btn-outline-primary dropdown-toggle" type="button"
                                     id="dropdownMenuButton1"
@@ -22,7 +22,8 @@
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox"
                                                    id="flexSwitchCheckDefault">
-                                            <label class="form-check-label" for="flexSwitchCheckDefault">CAS</label>
+                                            <label class="form-check-label"
+                                                   for="flexSwitchCheckDefault">CAS</label>
                                         </div>
                                     </div>
                                 </li>
@@ -49,27 +50,24 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="p-2 flex-grow-1">
-                        <div class="dropdown">
-                            <input class="form-control form-control-lg dropdown-toggle"
-                                   id="chemical-search-input"
-                                   data-bs-toggle="dropdown" aria-expanded="false" placeholder="Search Chemicals"
-                                   type="text" name="q" value="{{ request.GET.q }}" autocomplete="off">
+                    <label for="chemical-search-input"></label>  {% comment %}apparently it requires a label, even it that is empty{% endcomment %}
+                    <input class="form-control form-control-lg dropdown-toggle"
+                           id="chemical-search-input"
+                           data-bs-toggle="dropdown" aria-expanded="false" placeholder="Search Chemicals"
+                           type="text" name="q" value="{{ request.GET.q }}" autocomplete="off">
 
-                            <ul class="dropdown-menu" aria-labelledby="chemical-search-input"
-                                id="search-autocomplete-dropdown">
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="p-2">
+                    <ul class="dropdown-menu" aria-labelledby="chemical-search-input"
+                        id="search-autocomplete-dropdown">
+                    </ul>
+                    <div class="input-group-append">
                         <div class="btn-group">
                             <button class="btn btn-lg btn-success m-0" type="submit" id="MaterialButton-addon2"
                                     value="Search Chemicals" onclick="clear_local_storage()">Search &nbsp;<i
                                     class="fas fa-search"></i>
                             </button>
-                            {% comment %}If you change this to button the x is centered ... coudln't fix it{% endcomment %}
-                            <a class="btn btn-success" href="{% url 'chemmanager-home' %}"><i class="fas fa-times"
-                                                                                              onclick="clear_local_storage()"></i></a>
+                            <a class="btn btn-lg btn-success" href="{% url 'chemmanager-home' %}">
+                                <i class="fas fa-times" onclick="clear_local_storage()"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
