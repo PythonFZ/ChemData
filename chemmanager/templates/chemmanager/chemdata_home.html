@@ -3,43 +3,84 @@
 {#{% load crispy_forms_tags %}#}python
 
 {% block search_bar %}
+    <div class="mb-3"></div>  {% comment %}Add some vertical spacing{% endcomment %}
     <form id="chemical-search-form">
         <div class="row">
             <div class="col-sm-8">
-                <div class="md-form input-group">
-                    <input type="text" class="form-control" placeholder="Search Chemicals" aria-label="Search Chemicals"
-                           aria-describedby="MaterialButton-addon2" name="q" value="{{ request.GET.q }}"
-                           style="font-size: 150%" id="chemical-search-input" autocomplete="off" data-toggle="dropdown">
+                {#                <div class="md-form input-group">#}
+                <div class="d-flex flex-row">
+                    <div class="p-2">
+                        <div class="dropdown">
+                            <button class="btn btn-lg btn-outline-primary dropdown-toggle" type="button"
+                                    id="dropdownMenuButton1"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                Filter
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li>
+                                    <div class="dropdown-item">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="flexSwitchCheckDefault">
+                                            <label class="form-check-label" for="flexSwitchCheckDefault">CAS</label>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="dropdown-item">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="flexSwitchCheckDefault">
+                                            <label class="form-check-label" for="flexSwitchCheckDefault">In
+                                                stock</label>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="dropdown-item">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="flexSwitchCheckDefault">
+                                            <label class="form-check-label" for="flexSwitchCheckDefault">Other
+                                                Workgroups</label>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="p-2 flex-grow-1">
+                        <div class="dropdown">
+                            <input class="form-control form-control-lg dropdown-toggle"
+                                   id="chemical-search-input"
+                                   data-bs-toggle="dropdown" aria-expanded="false" placeholder="Search Chemicals"
+                                   type="text" name="q" value="{{ request.GET.q }}" autocomplete="off">
 
-                    <div class="dropdown-menu" aria-labelledby="search-autocomplete-dropdown"
-                         id="search-autocomplete-dropdown"></div>
-
-                    <div class="input-group-append">
-                        <button class="btn btn-lg btn-success m-0" type="submit" id="MaterialButton-addon2"
-                                value="Search Chemicals" onclick="clear_local_storage()">Search
-                        </button>
-                        <button class="btn btn-btn-lg btn-success m-0 dropdown-toggle dropdown-toggle-split"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-                        <div class="dropdown-menu">
-                            <a href="{% url 'chemmanager-home' %}" class="dropdown-item"
-                               onclick="clear_local_storage()">
-                                <i class="fas fa-undo"></i>&nbsp;Reset</a>
+                            <ul class="dropdown-menu" aria-labelledby="chemical-search-input"
+                                id="search-autocomplete-dropdown">
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <div class="btn-group">
+                            <button class="btn btn-lg btn-success m-0" type="submit" id="MaterialButton-addon2"
+                                    value="Search Chemicals" onclick="clear_local_storage()">Search &nbsp;<i
+                                    class="fas fa-search"></i>
+                            </button>
+                            {% comment %}If you change this to button the x is centered ... coudln't fix it{% endcomment %}
+                            <a class="btn btn-success" href="{% url 'chemmanager-home' %}"><i class="fas fa-times" onclick="clear_local_storage()"></i></a>
                         </div>
                     </div>
                 </div>
 
-            </div>
-            <div class="col-sm-4">
-                {{ parameter_form }}
-                {{ parameter_form.media }}
+
+                {#                </div>#}
             </div>
         </div>
     </form>
 
 {% endblock %}
 {% block content %}
-
-
     {% if not chemicals %}
         <div class="text-center">
             <i class="fa fa-flask fa-5x" style="color: rgba(0,0,0,0.4)"></i>
@@ -92,7 +133,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="collapse" id="collapseAll-{{ chemical.id }}">
+                        <div class="collapse stock-collapse" id="collapseAll-{{ chemical.id }}">
                             <table class="table table-sm">
                                 <thead class="thead-light">
                                 <tr>
@@ -235,22 +276,16 @@
 
     <script>
         $('.expand-chemical').click(function () {
-            {#var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, this.id.toString());#}
-            {#$('#chemical_detail_div').load(url);#}
+            var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, this.id.toString());
+            $('#chemical_detail_div').load(url);
         });
     </script>
     <script>
         $(document).ready(function () {
-
             $(document).on("click", ".search-suggestion", function () {
                 $('#chemical-search-input').val(this.text);
                 $('#chemical-search-form').submit();
                 console.log(this);
-            });
-
-            $('.chemical-search-parameter').select2({
-                placeholder: 'Choose additional Search-Parameter',
-                allowClear: true
             });
 
             $('[data-toggle="tooltip"]').tooltip();
@@ -266,10 +301,13 @@
                         success: function (response) {
                             $("#search-autocomplete-dropdown").empty();
                             response['names'].forEach(function (item, index) {
-                                {#console.log(item, index);#}
-                                $("#search-autocomplete-dropdown").append("<a class='dropdown-item search-suggestion' href='#'>" + item + "</a>");
-                                {#$("#search-autocomplete-dropdown").show();#}
+                                console.log(item, index);
+                                $("#search-autocomplete-dropdown").append("<li><a class='dropdown-item search-suggestion' href='#'>" + item + "</a></li>");
                             })
+                            {% comment %}
+                            The dropdown is not really connected to the search, they are all individual buttons that can
+                            converted by the click on search-suggestion
+                            {% endcomment %}
                         }
                     })
                 } else {
@@ -277,7 +315,7 @@
                 }
             });
 
-            var collapse_elements = $('.collapse');
+            var collapse_elements = $('.stock-collapse');
             collapse_elements.each(function () {
                 // Default close unless saved as open
                 if (localStorage.getItem('open_' + this.id) === 'open') {
@@ -291,7 +329,7 @@
         });
     </script>
 
-
+    {##}
     <script>
         function clear_local_storage() {
             var open_elements = [];
@@ -305,16 +343,16 @@
             }
         }
 
-        {##}
-        $('.collapse').on('show.bs.collapse', function () {
+
+        $('.stock-collapse').on('show.bs.collapse', function () {
             $('#caret-' + this.id).css('transform', 'rotate(' + '90deg)');
             var id = $(this).attr("id").split("collapseAll-")[1];
-            var url = "{% url 'chemical-detail' 1234 %}".replace(/1234/, id.toString())
+            var url = "{% url 'chemical-detail' 1 %}".replace(/1/, id.toString())
             $('#chemical_detail_div').load(url, function () {
                 MathJax.typeset()
             });
         });
-        $('.collapse').on('hide.bs.collapse', function () {
+        $('.stock-collapse').on('hide.bs.collapse', function () {
             $('#caret-' + this.id).css('transform', 'rotate(' + '0deg)');
             var id = $(this).attr("id").split("collapseAll-")[1];
             $('#chemical_detail_div').html('');
@@ -328,7 +366,7 @@
                     $('#collapseAll-' + id).collapse('toggle');
 
                     if (localStorage.getItem('open_' + 'collapseAll-' + id) !== 'open') {
-                        {#clear_local_storage();#}
+                        clear_local_storage();
                         localStorage.setItem('open_' + 'collapseAll-' + id, 'open');
                     } else {
                         localStorage.removeItem('open_' + 'collapseAll-' + id);
@@ -340,37 +378,20 @@
 {% endblock %}
 
 {% block navigation-bar %}
-    <form class="form-inline">
-        <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i class="fas fa-plus"></i>&nbsp;Add Chemical</a>
-        <a href="{% url 'storage-list' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i class="fas fa-archive"></i>&nbsp;Manage Storage</a>
-        <a href="{% url 'chemicallist-upload' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i class="fas fa-upload"></i>&nbsp;Upload Chemical List</a>
-    </form>
-
-{#    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">Chemical Manager</a>#}
-{#    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">Blog</a>#}
-{#    <a class="nav-item nav-link" href="{% url 'chemmanager-home' %}">About</a>#}
-{% endblock %}
-
-{% block custom_head %}
-    <link rel="stylesheet" type="text/css" href="{% static "fontawesome/css/all.min.css" %}"/>
-    <style>
-        .btn-group-lg .btn, .btn-group-sm .btn {
-            border-radius: 2px;
-        }
-
-        .chemical-item {
-            font-size: 100%;
-            font-weight: bolder;
-            padding-bottom: 0;
-        }
-
-        .chemical-item:hover {
-            background-color: rgba(0, 0, 0, 0.01);
-        }
-
-        .chemical-item-header {
-            font-size: 120%;
-            font-weight: bolder;
-        }
-    </style>
+        <li class="nav-link active">
+            <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                    class="fas fa-flask"></i></i>&nbsp;List View</a>
+        </li>
+        <li class="nav-link">
+            <a href="{% url 'chemical-create' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                    class="fas fa-plus"></i>&nbsp;Add Chemical</a>
+        </li>
+        <li class="nav-link">
+            <a href="{% url 'storage-list' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                    class="fas fa-archive"></i>&nbsp;Manage Storage</a>
+        </li>
+        <li class="nav-link">
+            <a href="{% url 'chemicallist-upload' %}" class="btn btn-outline-white" onclick="clear_local_storage()"><i
+                    class="fas fa-upload"></i>&nbsp;Upload Chemical List</a>
+        </li>
 {% endblock %}
